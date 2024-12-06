@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "/proto";
+
+package chat;
+
+service ChatService {
+    rpc ClaimName (ClaimNameRequest) returns (ClaimNameResponse) {}
+    rpc Connect (stream MessageRequest) returns (stream MessageResponse) {}
+}
+
+message ClaimNameRequest {
+    string name = 1;
+}
+
+message ClaimNameResponse {
+    string token = 1;
+}
+
+message MessageRequest {
+    string message = 2;
+}
+
+message MessageResponse {
+    string name = 1;
+    string response = 2;
+}
