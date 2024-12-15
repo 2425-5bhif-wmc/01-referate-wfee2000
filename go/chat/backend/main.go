@@ -4,9 +4,10 @@ import (
 	pb "chat/proto"
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"io"
 	"net"
+
+	"google.golang.org/grpc"
 )
 
 type server struct {
@@ -29,10 +30,6 @@ func (s *server) Connect(stream pb.ChatService_ConnectServer) error {
 
 	conn := connection{stream: stream, name: "TODO", index: len(s.connections)}
 	s.connections = append(s.connections, &conn)
-	err := stream.Send(&pb.ConnectResponse{Name: "Server", Response: "Welcome to the chat!"})
-	if err != nil {
-		return err
-	}
 	return s.broadcastMessages(conn)
 }
 
@@ -59,7 +56,7 @@ func (s *server) broadcastMessages(conn connection) error {
 func (s *server) broadcastMessage(message string, senderConnection connection) {
 	for _, conn := range s.connections {
 		if conn.stream != senderConnection.stream {
-			_ = conn.stream.Send(&pb.ConnectResponse{Name: conn.name, Response: message})
+			_ = conn.stream.Send(&pb.IncomingMessage{Name: conn.name, Response: message})
 		}
 	}
 }

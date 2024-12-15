@@ -6,7 +6,7 @@ option go_package = "/proto";
 
 service ChatService {
   rpc ClaimName(ClaimNameRequest) returns (ClaimNameResponse) {}
-  rpc Connect(stream ConnectRequest) returns (stream ConnectResponse) {}
+  rpc Connect(stream OutgoingMessage) returns (stream IncomingMessage) {}
 }
 
 message ClaimNameRequest {
@@ -17,11 +17,11 @@ message ClaimNameResponse {
   string token = 1;
 }
 
-message ConnectRequest {
+message OutgoingMessage {
   string message = 2;
 }
 
-message ConnectResponse {
+message IncomingMessage {
   string name = 1;
   string response = 2;
 }
