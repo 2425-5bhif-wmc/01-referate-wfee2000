@@ -60,8 +60,8 @@ func (c *chatServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption
 }
 
 type ChatService_ConnectClient interface {
-	Send(*MessageRequest) error
-	Recv() (*MessageResponse, error)
+	Send(*ConnectRequest) error
+	Recv() (*ConnectResponse, error)
 	grpc.ClientStream
 }
 
@@ -69,12 +69,12 @@ type chatServiceConnectClient struct {
 	grpc.ClientStream
 }
 
-func (x *chatServiceConnectClient) Send(m *MessageRequest) error {
+func (x *chatServiceConnectClient) Send(m *ConnectRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *chatServiceConnectClient) Recv() (*MessageResponse, error) {
-	m := new(MessageResponse)
+func (x *chatServiceConnectClient) Recv() (*ConnectResponse, error) {
+	m := new(ConnectResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -136,8 +136,8 @@ func _ChatService_Connect_Handler(srv interface{}, stream grpc.ServerStream) err
 }
 
 type ChatService_ConnectServer interface {
-	Send(*MessageResponse) error
-	Recv() (*MessageRequest, error)
+	Send(*ConnectResponse) error
+	Recv() (*ConnectRequest, error)
 	grpc.ServerStream
 }
 
@@ -145,12 +145,12 @@ type chatServiceConnectServer struct {
 	grpc.ServerStream
 }
 
-func (x *chatServiceConnectServer) Send(m *MessageResponse) error {
+func (x *chatServiceConnectServer) Send(m *ConnectResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *chatServiceConnectServer) Recv() (*MessageRequest, error) {
-	m := new(MessageRequest)
+func (x *chatServiceConnectServer) Recv() (*ConnectRequest, error) {
+	m := new(ConnectRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
