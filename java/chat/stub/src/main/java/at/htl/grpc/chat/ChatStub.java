@@ -6,6 +6,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 
 public class ChatStub {
+    private static String message = "";
+
     public static void main(String[] args) {
         ManagedChannel channel = Grpc
                 .newChannelBuilder("localhost:5555", InsecureChannelCredentials.create())
@@ -19,6 +21,11 @@ public class ChatStub {
                 .connect(new StreamObserver<>() {
                     @Override
                     public void onNext(Chat.IncomingMessage incomingMessage) {
+                        System.out.printf(
+                                "\033[2K\r%s: %s\n\rWrite message: %s",
+                                incomingMessage.getName(),
+                                incomingMessage.getResponse(),
+                                message);
                     }
 
                     @Override
