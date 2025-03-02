@@ -5,6 +5,9 @@ import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class ChatStub {
     private static String message = "";
 
@@ -38,5 +41,38 @@ public class ChatStub {
                         // should never happen
                     }
                 });
+
+        try {
+            SendMessages(outgoingObserver);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void SendMessages(StreamObserver<Chat.OutgoingMessage> outgoingObserver) throws IOException {
+        disableCanonical(System.in);
+
+        while (true) {
+            System.out.print("Write message: ");
+            while (true) {
+                char character = (char) System.in.read();
+
+                if (character == '\n' || character == '\r') {
+                    break;
+                }
+
+                message = message + character;
+                System.out.print("In");
+            }
+
+            outgoingObserver.onNext(Chat.OutgoingMessage.newBuilder().setMessage(message).build());
+            System.out.printf("\033[A\033[2K\rYou wrote: %s\n\r", message);
+
+            message = "";
+        }
+    }
+
+    private static void disableCanonical(InputStream inputStream) {
+        // TODO: disable Canonical for inputStream
     }
 }
