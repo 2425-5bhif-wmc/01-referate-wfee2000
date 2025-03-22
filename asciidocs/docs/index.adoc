@@ -1,4 +1,26 @@
-= Index page
-ifndef::imagesdir[:imagesdir: images]
+= gRPC
+:icons: font
+:toc:
+:source-highlighter: rouge
 
-image::img.png[]
+ifdef::env-ide[]
+:includedir: ../../project
+endif::[]
+ifndef::env-ide[]
+:includedir: project
+endif::[]
+
+ifdef::env-ide[]
+:imagesdir: ./images
+endif::[]
+
+== Slides
+
+https://2425-5bhif-wmc.github.io/01-referate-wfee2000/slides/[Slides]
+
+== gRPC in Quarkus
+
+
+
+== Demo Streaming Applikation (go)
+
