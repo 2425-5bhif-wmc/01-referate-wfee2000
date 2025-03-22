@@ -1,0 +1,28 @@
+= gRPC
+:icons: font
+:customcss: css/presentation.css
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: highlightjs
+:iconfont-remote!:
+:iconfont-name: fonts/fontawesome/css/all
+ifdef::env-ide[]
+:imagesdir: ../images
+endif::[]
+ifndef::env-ide[]
+:imagesdir: images
+endif::[]
+:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+
+gRPC Remote Procedure Calls
+
+== Eigenschaften von gRPC
+
+== Protobuf
+
+=== Was ist Protobuf
+
+=== Proto-File Aufbau
+
+== gRPC-Web
