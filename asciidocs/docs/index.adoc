@@ -20,7 +20,57 @@ https://2425-5bhif-wmc.github.io/01-referate-wfee2000/slides/[Slides]
 
 == gRPC in Quarkus
 
+=== Dependencies
 
+[source,xml]
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-grpc</artifactId>
+</dependency>
+----
+
+=== Protobuf
+
+In den Folder proto werden alle benötigten proto Dateien abgelegt.
+
+Mit dem shell command
+
+[source,shell]
+----
+mvn compile
+----
+
+werden alle benötigten Dateien generiert.
+
+=== Einen Stub verwenden
+
+Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Services "Injected" werden.
+
+[source,java]
+----
+@GrpcClient
+Greeter greeter;
+----
+
+Dann können alle Methoden die in den Protofiles definiert worden sind aufgerufen werden.
+
+Falls der gRPC Service nicht auf dem gleichen Quarkus Server läuft, muss der nur der Port und sonst auch der Host in den application.properties angegeben werden.
+
+[source]
+----
+quarkus.grpc.clients.<client-name>.host=<host>
+quarkus.grpc.clients.<client-name>.port=<port>
+----
+
+Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermasßen aussehen.
+
+[source]
+----
+quarkus.grpc.clients.greeter.host=localhost
+quarkus.grpc.clients.greeter.port=8080
+----
+
+=== Einen Service Implementieren
 
 == Demo Streaming Applikation (go)
-
