@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 @GrpcService
-public class HelloGrpcService implements HelloWorldService {
+public class GreeterService implements Greeter {
 
     @Override
     public Uni<HelloReply> sayHello(HelloRequest request) {
