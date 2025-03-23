@@ -571,9 +571,9 @@ pre.rouge .gs {
 <li><a href="#_protobuf">2.2. Protobuf</a></li>
 <li><a href="#_einen_stub_verwenden">2.3. Einen Stub verwenden</a></li>
 <li><a href="#_einen_service_implementieren">2.4. Einen Service Implementieren</a></li>
+<li><a href="#_demo_streaming_applikation_go">2.5. Demo Streaming Applikation (go)</a></li>
 </ul>
 </li>
-<li><a href="#_demo_streaming_applikation_go">3. Demo Streaming Applikation (go)</a></li>
 </ul>
 </div>
 </div>
@@ -616,6 +616,27 @@ pre.rouge .gs {
 <div class="paragraph">
 <p>werden alle benötigten Dateien generiert.</p>
 </div>
+<div class="paragraph">
+<p>Für dieses Beispiel wird ein Service mit folgenden methoden definiert.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
+
+<span class="kd">service</span> <span class="n">Greeter</span> <span class="p">{</span>
+  <span class="k">rpc</span> <span class="n">SayHello</span><span class="p">(</span><span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">StreamHello</span><span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloReply</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">HelloRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">HelloReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="kd">message</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_einen_stub_verwenden"><a class="anchor" href="#_einen_stub_verwenden"></a>2.3. Einen Stub verwenden</h3>
@@ -629,10 +650,12 @@ pre.rouge .gs {
 </div>
 </div>
 <div class="paragraph">
-<p>Dann können alle Methoden die in den Protofiles definiert worden sind aufgerufen werden.</p>
+<p>Dann können alle Methoden, die in den Protofiles definiert worden sind, aufgerufen werden.</p>
 </div>
+<div class="sect3">
+<h4 id="_konfiguration"><a class="anchor" href="#_konfiguration"></a>2.3.1. Konfiguration</h4>
 <div class="paragraph">
-<p>Falls der gRPC Service nicht auf dem gleichen Quarkus Server läuft, muss der nur der Port und sonst auch der Host in den application.properties angegeben werden.</p>
+<p>Der Port und Host des gRPC Service kann mit folgender Konfiguration in den application.properties definiert werden.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -641,7 +664,10 @@ quarkus.grpc.clients.&lt;client-name&gt;.port=&lt;port&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermasßen aussehen.</p>
+<p>Der Host ist dabei per Default "localhost" und der Port ist per Default 9000.</p>
+</div>
+<div class="paragraph">
+<p>Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermaßen aussehen.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -650,22 +676,105 @@ quarkus.grpc.clients.greeter.port=8080</code></pre>
 </div>
 </div>
 </div>
+</div>
 <div class="sect2">
 <h3 id="_einen_service_implementieren"><a class="anchor" href="#_einen_service_implementieren"></a>2.4. Einen Service Implementieren</h3>
+<div class="sect3">
+<h4 id="_konfiguration_2"><a class="anchor" href="#_konfiguration_2"></a>2.4.1. Konfiguration</h4>
+<div class="paragraph">
+<p>Falls man den gRPC Service nicht auf einem separaten Server laufen lassen möchte, muss man folgendes in den application.properties eintragen.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>quarkus.grpc.server.use-separate-server=false</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_implementierung"><a class="anchor" href="#_implementierung"></a>2.4.2. Implementierung</h4>
+<div class="paragraph">
+<p>Um unseren GreeterService nun zu implementieren, müssen wir eine Klasse GreeterService erstellen die unseren gRPC Service implementiert.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@GrpcService</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GreeterService</span> <span class="kd">implements</span> <span class="nc">Greeter</span> <span class="o">{</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nun müssen die definierten Methoden ausprogrammiert werden.</p>
+</div>
+<div class="paragraph">
+<div class="title">SayHello</div>
+<p>Die Methode SayHello soll eine Begrüßung für einen mitgegebenen Namen generieren und zurückschicken.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">index</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:/</span><span class="n">documents</span><span class="o">/../../</span><span class="n">java</span><span class="o">/</span><span class="n">demo</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">at</span><span class="o">/</span><span class="n">htl</span><span class="o">/</span><span class="n">grpc</span><span class="o">/</span><span class="nc">GreeterService</span><span class="o">.</span><span class="na">java</span><span class="o">[</span><span class="n">tag</span><span class="o">=</span><span class="n">sayHello</span><span class="o">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In diesem Beispiel müssen wir drei Sachen machen, um unser gRPC Objekt zu kreieren:</p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Einen neuen Builder des HelloReply typen erstellen</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Unsere Begrüßung in die Eigenschaft message speichern</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Das Objekt bauen</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">StreamHello</div>
+<p>Die Methode StreamHello soll jede Sekunde eine generierte Begrüßung schicken.
+Es wird immer der zuletzt geschickte Name verwendet.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">index</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:/</span><span class="n">documents</span><span class="o">/../../</span><span class="n">java</span><span class="o">/</span><span class="n">demo</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">at</span><span class="o">/</span><span class="n">htl</span><span class="o">/</span><span class="n">grpc</span><span class="o">/</span><span class="nc">GreeterService</span><span class="o">.</span><span class="na">java</span><span class="o">[</span><span class="n">tag</span><span class="o">=</span><span class="n">streamHello</span><span class="o">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Hier gibt es 3 grobe Abschnitte</p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Eine Referenz auf einen String erstellen, auf die man aus mehreren Threads zugreifen kann</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Diese Referenz immer dann neu setzten, wenn der Stub/Client einen neuen Namen schickt</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Alle Sekunden eine Begrüßung mit dem Momentan gesetzten Namen an den Stub/Client schicken</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_demo_streaming_applikation_go"><a class="anchor" href="#_demo_streaming_applikation_go"></a>2.5. Demo Streaming Applikation (go)</h3>
 
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_demo_streaming_applikation_go"><a class="anchor" href="#_demo_streaming_applikation_go"></a>3. Demo Streaming Applikation (go)</h2>
-<div class="sectionbody">
-
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-22 21:26:58 UTC
+Last updated 2025-03-23 17:10:06 UTC
 </div>
 </div>
 </body>
