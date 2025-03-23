@@ -3,12 +3,7 @@
 :toc:
 :source-highlighter: rouge
 
-ifdef::env-idea[]
 :javaserver: ../../java/demo/server/src/main/java/at/htl/grpc
-endif::env-idea[]
-ifndef::env-idea[]
-:javaserver: ../java/demo/server/src/main/java/at/htl/grpc
-endif::env-idea[]
 
 ifdef::env-idea[]
 :imagesdir: ./images

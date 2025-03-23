@@ -47,7 +47,7 @@ convertFilesToHTML() {
     echo $buildPath
 
     docker run --rm \
-      -v ${PWD}/$buildPath/docs:/documents \
+      -v ${PWD}/:/project \
       asciidoctor/docker-asciidoctor:$asciidoctorVersion /bin/bash -c "asciidoctor \
       -r asciidoctor-diagram \
       -a icons=font \
@@ -64,7 +64,7 @@ convertFilesToHTML() {
       -a favicon=themes/favicon.png \
       -a sourcedir=src/main/java \
       -b html5 \
-      '**/*.adoc'"
+      '/project/$buildPath/docs/**/*.adoc'"
 
       mv $buildPath/docs/* $buildPath
       rmdir $buildPath/docs
