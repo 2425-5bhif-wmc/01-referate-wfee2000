@@ -4,16 +4,26 @@ import (
 	pb "chat/proto"
 	"context"
 	"fmt"
-	"io"
 	"net"
+	"os"
 	"slices"
+	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
+
+var secret string
 
 type server struct {
 	pb.UnimplementedChatServer
 	connections []*connection
+	names       map[string]bool
 }
 
 type connection struct {
@@ -23,46 +33,149 @@ type connection struct {
 }
 
 func (s *server) ClaimName(ctx context.Context, in *pb.ClaimNameRequest) (*pb.ClaimNameResponse, error) {
-	return &pb.ClaimNameResponse{Token: "string"}, nil
+	if occupied, ok := s.names[in.Name]; ok && occupied {
+		fmt.Println(occupied)
+		return nil, status.Error(codes.AlreadyExists, "name already claimed")
+	}
+
+	s.names[in.Name] = true
+
+	token, err := createTokenForName(in.Name)
+
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid name")
+	}
+
+	return &pb.ClaimNameResponse{Token: token}, nil
+}
+
+func createTokenForName(name string) (string, error) {
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": name,
+		"iss": "winnie.at",
+		"exp": time.Now().Add(time.Hour).Unix(),
+	})
+
+	return token.SignedString([]byte(secret))
 }
 
 func (s *server) Connect(stream pb.Chat_ConnectServer) error {
-	// TODO: check header for token
+	name, err := getName(stream)
 
-	conn := connection{stream: stream, name: "TODO", index: len(s.connections)}
+	if err != nil {
+		return err
+	}
+
+	conn := connection{stream: stream, name: name, index: len(s.connections)}
 	s.connections = append(s.connections, &conn)
 	return s.broadcastMessages(conn)
 }
 
-func (s *server) broadcastMessages(conn connection) error {
-	for {
-		in, err := conn.stream.Recv()
-		if err == io.EOF {
-			s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
-			break
-		}
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
+func getName(stream pb.Chat_ConnectServer) (string, error) {
 
-		s.broadcastMessage(in.Message, conn)
+	raw_token, err := getTokenString(stream)
+	if err != nil {
+		return "", err
+	}
 
-		fmt.Printf("Received message: %v\n", in)
+	split_string := strings.Split(raw_token, " ")
+
+	if len(split_string) != 2 || split_string[0] != "Bearer" {
+		return "", status.Error(codes.Unauthenticated, "invalid token format")
+	}
+
+	token, err := jwt.Parse(split_string[1], func(token *jwt.Token) (any, error) {
+		return secret, nil
+	}, jwt.WithValidMethods([]string{"HS256"}))
+
+	if err != nil && token.Valid {
+		return "", err
+	}
+
+	err = validateToken(token)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token.Claims.GetSubject()
+}
+
+func validateToken(token *jwt.Token) error {
+	claims, ok := token.Claims.(jwt.Claims)
+	if !ok {
+		return status.Error(codes.Unauthenticated, "invalid token")
+	}
+
+	err := jwt.NewValidator().Validate(claims)
+
+	if err != nil {
+		return err
+	}
+
+	iss, err := claims.GetIssuer()
+
+	if err != nil || iss != "winnie.at" {
+		return err
 	}
 
 	return nil
 }
 
+func getTokenString(stream pb.Chat_ConnectServer) (string, error) {
+	metadata, _ := metadata.FromIncomingContext(stream.Context())
+	raw_token := metadata["authorization"]
+
+	if raw_token == nil || len(raw_token) == 0 {
+		return "", status.Error(codes.Unauthenticated, "missing authorization token")
+	}
+
+	return raw_token[0], nil
+}
+
+func (s *server) broadcastMessages(conn connection) error {
+	for {
+		in, err := conn.stream.Recv()
+		if err != nil {
+			s.reactToError(err, conn)
+			return err
+		}
+
+		s.broadcastMessage(in.Message, conn)
+
+		fmt.Printf("%s sent message: %s\n", conn.name, in.Message)
+	}
+}
+
+func (s *server) reactToError(err error, conn connection) {
+	if err, ok := status.FromError(err); ok {
+		s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
+		s.names[conn.name] = false
+
+		fmt.Printf("%s encountered error: %v\n", conn.name, err)
+		return
+	}
+
+	fmt.Println(err)
+}
+
 func (s *server) broadcastMessage(message string, senderConnection connection) {
 	for _, conn := range s.connections {
 		if conn.stream != senderConnection.stream {
-			_ = conn.stream.Send(&pb.IncomingMessage{Name: conn.name, Response: message})
+			_ = conn.stream.Send(&pb.IncomingMessage{Name: senderConnection.name, Response: message})
 		}
 	}
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
+
+	secret = os.Getenv("SECRET")
+
 	lis, err := net.Listen("tcp4", ":5555")
 	if err != nil {
 		panic(err)
@@ -70,7 +183,7 @@ func main() {
 
 	s := grpc.NewServer()
 
-	grpcServer := &server{}
+	grpcServer := &server{names: map[string]bool{}}
 
 	pb.RegisterChatServer(s, grpcServer)
 
