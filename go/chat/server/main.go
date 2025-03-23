@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"slices"
 
 	"google.golang.org/grpc"
 )
 
 type server struct {
-	pb.UnimplementedChatServiceServer
+	pb.UnimplementedChatServer
 	connections []*connection
 }
 
 type connection struct {
-	stream pb.ChatService_ConnectServer
+	stream pb.Chat_ConnectServer
 	name   string
 	index  int
 }
@@ -25,7 +26,7 @@ func (s *server) ClaimName(ctx context.Context, in *pb.ClaimNameRequest) (*pb.Cl
 	return &pb.ClaimNameResponse{Token: "string"}, nil
 }
 
-func (s *server) Connect(stream pb.ChatService_ConnectServer) error {
+func (s *server) Connect(stream pb.Chat_ConnectServer) error {
 	// TODO: check header for token
 
 	conn := connection{stream: stream, name: "TODO", index: len(s.connections)}
@@ -37,7 +38,7 @@ func (s *server) broadcastMessages(conn connection) error {
 	for {
 		in, err := conn.stream.Recv()
 		if err == io.EOF {
-			s.connections = append(s.connections[:conn.index], s.connections[conn.index+1:]...)
+			s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
 			break
 		}
 		if err != nil {
@@ -62,7 +63,7 @@ func (s *server) broadcastMessage(message string, senderConnection connection) {
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":5555")
+	lis, err := net.Listen("tcp4", ":5555")
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +72,7 @@ func main() {
 
 	grpcServer := &server{}
 
-	pb.RegisterChatServiceServer(s, grpcServer)
+	pb.RegisterChatServer(s, grpcServer)
 
 	fmt.Printf("Server listening on %v\n", lis.Addr())
 	if err := s.Serve(lis); err != nil {

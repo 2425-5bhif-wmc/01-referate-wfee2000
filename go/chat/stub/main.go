@@ -22,15 +22,21 @@ type state struct {
 }
 
 func main() {
-	conn, err := grpc.NewClient(":5555", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("winnie.at:5555", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Printf("Connected to server\n")
 	defer conn.Close()
 
-	client := pb.NewChatServiceClient(conn)
+	client := pb.NewChatClient(conn)
 	response, err := client.ClaimName(context.Background(), &pb.ClaimNameRequest{Name: "Winnie"})
+
+	if err != nil {
+		panic(err)
+	}
+
 	md := metadata.Pairs("authorization", fmt.Sprintf("Bearer %s", response.Token))
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 	stream, err := client.Connect(ctx)
@@ -44,7 +50,7 @@ func main() {
 	sendMessage(stream)
 }
 
-func displayMessages(stream pb.ChatService_ConnectClient) {
+func displayMessages(stream pb.Chat_ConnectClient) {
 	for {
 		in, err := stream.Recv()
 		if err != nil {
@@ -55,7 +61,7 @@ func displayMessages(stream pb.ChatService_ConnectClient) {
 	}
 }
 
-func sendMessage(stream pb.ChatService_ConnectClient) {
+func sendMessage(stream pb.Chat_ConnectClient) {
 	state, err := disableCanonical(os.Stdin.Fd())
 
 	if err != nil {
