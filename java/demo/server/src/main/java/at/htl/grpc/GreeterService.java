@@ -9,30 +9,34 @@ import java.util.concurrent.atomic.AtomicReference;
 @GrpcService
 public class GreeterService implements Greeter {
 
+    // tag::sayHello[]
     @Override
     public Uni<HelloReply> sayHello(HelloRequest request) {
         return Uni.createFrom()
             .item(
-                HelloReply.newBuilder()
-                    .setMessage(greet(request.getName()))
-                    .build()
+                HelloReply.newBuilder() // <1>
+                    .setMessage(greet(request.getName())) // <2>
+                    .build() // <3>
             );
     }
+    // end::sayHello[]
 
+    // tag::streamHello[]
     public Multi<HelloReply> streamHello(Multi<HelloRequest> incomingStream) {
-        AtomicReference<String> name = new AtomicReference<>("");
-        incomingStream
+        AtomicReference<String> name = new AtomicReference<>(""); // <1>
+        incomingStream // <2>
             .subscribe()
             .with(request -> {
                 name.set(request.getName());
             });
-        return Multi.createFrom()
+        return Multi.createFrom() // <3>
             .ticks()
             .every(Duration.ofSeconds(1))
             .map(ignored ->
                 HelloReply.newBuilder().setMessage(greet(name.get())).build()
             );
     }
+    // end::streamHello[]
 
     private String greet(String name) {
         return String.format("Hello %s!", name);
