@@ -3,11 +3,16 @@
 :toc:
 :source-highlighter: rouge
 
-:javaserver: {docdir}/../../java/demo/server/src/main/java/at/htl/grpc
+ifdef::env-idea[]
+:javaserver: ../../java/demo/server/src/main/java/at/htl/grpc
+endif::env-idea[]
+ifndef::env-idea[]
+:javaserver: java/demo/server/src/main/java/at/htl/grpc
+endif::env-idea[]
 
-ifdef::env-ide[]
+ifdef::env-idea[]
 :imagesdir: ./images
-endif::[]
+endif::env-idea[]
 
 == Slides
 
