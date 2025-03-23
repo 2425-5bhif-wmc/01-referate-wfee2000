@@ -34,7 +34,6 @@ type connection struct {
 
 func (s *server) ClaimName(ctx context.Context, in *pb.ClaimNameRequest) (*pb.ClaimNameResponse, error) {
 	if occupied, ok := s.names[in.Name]; ok && occupied {
-		fmt.Println(occupied)
 		return nil, status.Error(codes.AlreadyExists, "name already claimed")
 	}
 
@@ -67,13 +66,16 @@ func (s *server) Connect(stream pb.Chat_ConnectServer) error {
 		return err
 	}
 
+	if s.names[name] {
+		return status.Error(codes.AlreadyExists, "This Name is already claimed and used please choose another name or wait for the name to be released!")
+	}
+
 	conn := connection{stream: stream, name: name, index: len(s.connections)}
 	s.connections = append(s.connections, &conn)
 	return s.broadcastMessages(conn)
 }
 
 func getName(stream pb.Chat_ConnectServer) (string, error) {
-
 	raw_token, err := getTokenString(stream)
 	if err != nil {
 		return "", err
@@ -153,11 +155,12 @@ func (s *server) reactToError(err error, conn connection) {
 		s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
 		s.names[conn.name] = false
 
-		fmt.Printf("%s encountered error: %v\n", conn.name, err)
-		return
+		if err.Code() == codes.Canceled {
+			return
+		}
 	}
 
-	fmt.Println(err)
+	fmt.Printf("%s encountered error: %v\n", conn.name, err)
 }
 
 func (s *server) broadcastMessage(message string, senderConnection connection) {
