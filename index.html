@@ -712,7 +712,15 @@ quarkus.grpc.clients.greeter.port=8080</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">index</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:../</span><span class="n">java</span><span class="o">/</span><span class="n">demo</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">at</span><span class="o">/</span><span class="n">htl</span><span class="o">/</span><span class="n">grpc</span><span class="o">/</span><span class="nc">GreeterService</span><span class="o">.</span><span class="na">java</span><span class="o">[</span><span class="n">tag</span><span class="o">=</span><span class="n">sayHello</span><span class="o">]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java">    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">Uni</span><span class="o">&lt;</span><span class="nc">HelloReply</span><span class="o">&gt;</span> <span class="nf">sayHello</span><span class="o">(</span><span class="nc">HelloRequest</span> <span class="n">request</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nc">Uni</span><span class="o">.</span><span class="na">createFrom</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">item</span><span class="o">(</span>
+                <span class="nc">HelloReply</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span> <i class="conum" data-value="1"></i><b>(1)</b>
+                    <span class="o">.</span><span class="na">setMessage</span><span class="o">(</span><span class="n">greet</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">getName</span><span class="o">()))</span> <i class="conum" data-value="2"></i><b>(2)</b>
+                    <span class="o">.</span><span class="na">build</span><span class="o">()</span> <i class="conum" data-value="3"></i><b>(3)</b>
+            <span class="o">);</span>
+    <span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -741,7 +749,20 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">index</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:../</span><span class="n">java</span><span class="o">/</span><span class="n">demo</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">at</span><span class="o">/</span><span class="n">htl</span><span class="o">/</span><span class="n">grpc</span><span class="o">/</span><span class="nc">GreeterService</span><span class="o">.</span><span class="na">java</span><span class="o">[</span><span class="n">tag</span><span class="o">=</span><span class="n">streamHello</span><span class="o">]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java">    <span class="kd">public</span> <span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">HelloReply</span><span class="o">&gt;</span> <span class="nf">streamHello</span><span class="o">(</span><span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">HelloRequest</span><span class="o">&gt;</span> <span class="n">incomingStream</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">AtomicReference</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">name</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AtomicReference</span><span class="o">&lt;&gt;(</span><span class="s">""</span><span class="o">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+        <span class="n">incomingStream</span> <i class="conum" data-value="2"></i><b>(2)</b>
+            <span class="o">.</span><span class="na">subscribe</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="n">request</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">name</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+            <span class="o">});</span>
+        <span class="k">return</span> <span class="nc">Multi</span><span class="o">.</span><span class="na">createFrom</span><span class="o">()</span> <i class="conum" data-value="3"></i><b>(3)</b>
+            <span class="o">.</span><span class="na">ticks</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">every</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofSeconds</span><span class="o">(</span><span class="mi">1</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">ignored</span> <span class="o">-&gt;</span>
+                <span class="nc">HelloReply</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">().</span><span class="na">setMessage</span><span class="o">(</span><span class="n">greet</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">get</span><span class="o">())).</span><span class="na">build</span><span class="o">()</span>
+            <span class="o">);</span>
+    <span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -774,7 +795,7 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 17:59:00 UTC
+Last updated 2025-03-23 22:58:26 UTC
 </div>
 </div>
 </body>
