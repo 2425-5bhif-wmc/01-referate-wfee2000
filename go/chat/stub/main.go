@@ -31,7 +31,7 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewChatClient(conn)
-	response, err := client.ClaimName(context.Background(), &pb.ClaimNameRequest{Name: "Winnie"})
+	response, err := client.ClaimName(context.Background(), &pb.ClaimNameRequest{Name: strings.Join(os.Args[1:], " ")})
 
 	if err != nil {
 		panic(err)
@@ -85,6 +85,18 @@ func sendMessage(stream pb.Chat_ConnectClient) {
 
 			if rune == '\r' || rune == '\n' {
 				break
+			}
+
+			if rune == 127 {
+				fmt.Print("\b\b  \b\b")
+				if len(message) > 1 {
+					message = message[:len(message)-1]
+					fmt.Print("\b \b")
+				} else if len(message) == 1 {
+					fmt.Print("\r\033[2K\rWrite message: ")
+				}
+
+				continue
 			}
 
 			message += string(rune)
