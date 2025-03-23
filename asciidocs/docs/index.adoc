@@ -3,12 +3,7 @@
 :toc:
 :source-highlighter: rouge
 
-ifdef::env-ide[]
-:includedir: ../../project
-endif::[]
-ifndef::env-ide[]
-:includedir: project
-endif::[]
+:javaserver: {docdir}/../../java/demo/server/src/main/java/at/htl/grpc
 
 ifdef::env-ide[]
 :imagesdir: ./images
@@ -43,6 +38,26 @@ mvn compile
 
 werden alle benötigten Dateien generiert.
 
+Für dieses Beispiel wird ein Service mit folgenden methoden definiert.
+
+[source,protobuf]
+----
+syntax = "proto3";
+
+service Greeter {
+  rpc SayHello(HelloRequest) returns (HelloReply) {}
+  rpc StreamHello(stream HelloRequest) returns (stream HelloReply) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+----
+
 === Einen Stub verwenden
 
 Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Services "Injected" werden.
@@ -53,9 +68,11 @@ Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Servi
 Greeter greeter;
 ----
 
-Dann können alle Methoden die in den Protofiles definiert worden sind aufgerufen werden.
+Dann können alle Methoden, die in den Protofiles definiert worden sind, aufgerufen werden.
 
-Falls der gRPC Service nicht auf dem gleichen Quarkus Server läuft, muss der nur der Port und sonst auch der Host in den application.properties angegeben werden.
+==== Konfiguration
+
+Der Port und Host des gRPC Service kann mit folgender Konfiguration in den application.properties definiert werden.
 
 [source]
 ----
@@ -63,7 +80,9 @@ quarkus.grpc.clients.<client-name>.host=<host>
 quarkus.grpc.clients.<client-name>.port=<port>
 ----
 
-Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermasßen aussehen.
+Der Host ist dabei per Default "localhost" und der Port ist per Default 9000.
+
+Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermaßen aussehen.
 
 [source]
 ----
@@ -73,4 +92,58 @@ quarkus.grpc.clients.greeter.port=8080
 
 === Einen Service Implementieren
 
-== Demo Streaming Applikation (go)
+==== Konfiguration
+
+Falls man den gRPC Service nicht auf einem separaten Server laufen lassen möchte, muss man folgendes in den application.properties eintragen.
+
+[source]
+----
+quarkus.grpc.server.use-separate-server=false
+----
+
+==== Implementierung
+
+Um unseren GreeterService nun zu implementieren, müssen wir eine Klasse GreeterService erstellen die unseren gRPC Service implementiert.
+
+[source,java]
+----
+@GrpcService
+public class GreeterService implements Greeter {
+
+}
+----
+
+Nun müssen die definierten Methoden ausprogrammiert werden.
+
+.SayHello
+
+Die Methode SayHello soll eine Begrüßung für einen mitgegebenen Namen generieren und zurückschicken.
+
+[source, java]
+----
+include::{javaserver}/GreeterService.java[tag=sayHello]
+----
+
+In diesem Beispiel müssen wir drei Sachen machen, um unser gRPC Objekt zu kreieren:
+
+<1> Einen neuen Builder des HelloReply typen erstellen
+<2> Unsere Begrüßung in die Eigenschaft message speichern
+<3> Das Objekt bauen
+
+.StreamHello
+
+Die Methode StreamHello soll jede Sekunde eine generierte Begrüßung schicken.
+Es wird immer der zuletzt geschickte Name verwendet.
+
+[source, java]
+----
+include::{javaserver}/GreeterService.java[tag=streamHello]
+----
+
+Hier gibt es 3 grobe Abschnitte
+
+<1> Eine Referenz auf einen String erstellen, auf die man aus mehreren Threads zugreifen kann
+<2> Diese Referenz immer dann neu setzten, wenn der Stub/Client einen neuen Namen schickt
+<3> Alle Sekunden eine Begrüßung mit dem Momentan gesetzten Namen an den Stub/Client schicken
+
+=== Demo Streaming Applikation (go)
