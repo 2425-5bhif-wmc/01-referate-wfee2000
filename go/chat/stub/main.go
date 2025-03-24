@@ -22,7 +22,7 @@ type state struct {
 }
 
 func main() {
-	conn, err := grpc.NewClient("winnie.at:5555", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("winnie.at:80", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}

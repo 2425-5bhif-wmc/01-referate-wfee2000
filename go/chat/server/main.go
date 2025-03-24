@@ -37,7 +37,7 @@ func (s *server) ClaimName(ctx context.Context, in *pb.ClaimNameRequest) (*pb.Cl
 		return nil, status.Error(codes.AlreadyExists, "name already claimed")
 	}
 
-	s.names[in.Name] = true
+	s.names[in.Name] = false
 
 	token, err := createTokenForName(in.Name)
 
@@ -70,9 +70,11 @@ func (s *server) Connect(stream pb.Chat_ConnectServer) error {
 		return status.Error(codes.AlreadyExists, "This Name is already claimed and used please choose another name or wait for the name to be released!")
 	}
 
+	s.names[name] = true
+
 	conn := connection{stream: stream, name: name, index: len(s.connections)}
 	s.connections = append(s.connections, &conn)
-	return s.broadcastMessages(conn)
+	return s.broadcastMessages(&conn)
 }
 
 func getName(stream pb.Chat_ConnectServer) (string, error) {
@@ -136,7 +138,7 @@ func getTokenString(stream pb.Chat_ConnectServer) (string, error) {
 	return raw_token[0], nil
 }
 
-func (s *server) broadcastMessages(conn connection) error {
+func (s *server) broadcastMessages(conn *connection) error {
 	for {
 		in, err := conn.stream.Recv()
 		if err != nil {
@@ -150,9 +152,14 @@ func (s *server) broadcastMessages(conn connection) error {
 	}
 }
 
-func (s *server) reactToError(err error, conn connection) {
+func (s *server) reactToError(err error, conn *connection) {
 	if err, ok := status.FromError(err); ok {
 		s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
+
+		for _, c := range s.connections {
+			c.index--
+		}
+
 		s.names[conn.name] = false
 
 		if err.Code() == codes.Canceled {
@@ -163,7 +170,7 @@ func (s *server) reactToError(err error, conn connection) {
 	fmt.Printf("%s encountered error: %v\n", conn.name, err)
 }
 
-func (s *server) broadcastMessage(message string, senderConnection connection) {
+func (s *server) broadcastMessage(message string, senderConnection *connection) {
 	for _, conn := range s.connections {
 		if conn.stream != senderConnection.stream {
 			_ = conn.stream.Send(&pb.IncomingMessage{Name: senderConnection.name, Response: message})
