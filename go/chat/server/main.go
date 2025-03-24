@@ -156,7 +156,7 @@ func (s *server) reactToError(err error, conn *connection) {
 	if err, ok := status.FromError(err); ok {
 		s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
 
-		for _, c := range s.connections {
+		for _, c := range s.connections[conn.index:] {
 			c.index--
 		}
 
