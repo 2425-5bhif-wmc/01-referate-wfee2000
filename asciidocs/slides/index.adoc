@@ -6,23 +6,102 @@
 :source-highlighter: highlightjs
 :iconfont-remote!:
 :iconfont-name: fonts/fontawesome/css/all
-ifdef::env-ide[]
-:imagesdir: ../images
-endif::[]
-ifndef::env-ide[]
 :imagesdir: images
-endif::[]
 :title-slide-transition: zoom
 :title-slide-transition-speed: fast
 
 gRPC Remote Procedure Calls
 
-== Eigenschaften von gRPC
+== Architektur von gRPC
+
+image::grpc-architekture.png[width=600]
+
+https://grpc.io/docs/what-is-grpc/introduction
 
 == Protobuf
 
-=== Was ist Protobuf
+Protocol Buffers
+
+=== Wozu verwendet man Protobuf
+
+Protobuf ist eine binäre Serialisierungssprache, die Sprachunabhängig ist.
+
+=== Typen
+
+Protobuf unterstützt alle Primitiven Datentypen.
+
+Zusätzlich können eigene Datentypen (messages) erstellt werden.
+Innerhalb dieser Typen muss die Position der benutzen eigenschaften definiert werden.
+
+[source, protobuf]
+----
+message MyMessage {
+  int32 a = 1;
+  string b = 2;
+}
+----
+
+==== Listen
+
+Mit dem `repeated` Keyword kann man eine Liste von Messages erstellen.
+
+[source, protobuf]
+----
+message Person {
+  string name = 1;
+  int32 id = 2;
+  repeated string hobbies = 3;
+}
+----
 
 === Proto-File Aufbau
 
+==== Syntax
+
+[source, protobuf]
+----
+syntax = "proto3";
+----
+
+Als Erstes muss eine Protobuf version definiert werden, wobei proto3 der standard ist.
+
+==== Package
+
+[source, protobuf]
+----
+syntax = "proto3";
+
+package my_package;
+----
+
+Optional kann ein Package angegeben werden, falls es bei mehreren Files gleiche Message Names gibt.
+
+==== Options
+
+Mit dem `optional` Keyword können kompilier flags befüllt werden.
+
+[source, protobuf]
+----
+syntax = "proto3";
+
+option java_package = "com.example";
+----
+
+==== Services
+
+[source, protobuf]
+----
+service MyService {
+  syntax = "proto3";
+
+  option java_package = "com.example";
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+----
+
+Mit einem Service definiert man alle Methoden (Schnittstellen), die man in gRPC verwenden möchte.
+
 == gRPC-Web
+
+gRPC-Web ist keine gRPC Implementation für Webbrowser.
+Es ist ein alternatives protokoll was mit einem http wrapper wieder zu gRPC umgewandelt werden muss.
