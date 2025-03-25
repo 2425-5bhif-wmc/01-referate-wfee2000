@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package chat;
-
 option go_package = "/proto";
 option java_package = "at.htl.grpc.chat";
 
@@ -19,7 +17,7 @@ message ClaimNameResponse {
 }
 
 message OutgoingMessage {
-  string message = 2;
+  string message = 1;
 }
 
 message IncomingMessage {

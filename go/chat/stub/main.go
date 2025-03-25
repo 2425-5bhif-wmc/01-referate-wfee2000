@@ -93,13 +93,12 @@ func sendMessages(stream pb.Chat_ConnectClient) {
 
 	for {
 		// Get message from terminal
-		message, err := readMessage(reader)
+		err := readMessage(reader)
 
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-
 		// Send message to server
 		sendMessage(stream, strings.TrimSpace(message))
 
@@ -111,22 +110,20 @@ func sendMessages(stream pb.Chat_ConnectClient) {
 // Reads input from terminal and manipulates message string accordingly.
 // Special characters like \n \r and 127 should be handled.
 // Returns message string and error if any.
-func readMessage(reader *bufio.Reader) (string, error) {
+func readMessage(reader *bufio.Reader) error {
 	fmt.Print("Write message: ")
-
-	message := ""
 
 	for {
 		// read first character
 		rune, err := reader.ReadByte()
 
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		// return if enter or newline
 		if rune == '\r' || rune == '\n' {
-			return message, nil
+			return nil
 		}
 
 		// remove character from message

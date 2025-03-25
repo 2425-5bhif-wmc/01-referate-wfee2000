@@ -17,7 +17,7 @@ message ClaimNameResponse {
 }
 
 message OutgoingMessage {
-  string message = 2;
+  string message = 1;
 }
 
 message IncomingMessage {
