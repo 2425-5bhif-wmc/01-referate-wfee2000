@@ -129,7 +129,7 @@ func validateToken(token *jwt.Token) error {
 
 func getTokenString(stream pb.Chat_ConnectServer) (string, error) {
 	metadata, _ := metadata.FromIncomingContext(stream.Context())
-	raw_token := metadata["authorization"]
+	raw_token := metadata.Get("authorization")
 
 	if raw_token == nil || len(raw_token) == 0 {
 		return "", status.Error(codes.Unauthenticated, "missing authorization token")
