@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option go_package = "/proto";
-option java_package = "at.htl.grpc.chat";
+option java_package = "at.htl.grpc";
 
 service Chat {
   rpc ClaimName(ClaimNameRequest) returns (ClaimNameResponse) {}
