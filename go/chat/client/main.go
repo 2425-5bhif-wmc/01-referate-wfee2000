@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/pkg/term/termios"
 	"golang.org/x/sys/unix"
@@ -78,7 +79,7 @@ func displayMessages(stream pb.Chat_ConnectClient) {
 // Messages to server.
 func sendMessages(stream pb.Chat_ConnectClient) {
 	// Remove canonical flag from terminal
-	state, err := disableCanonical(os.Stdin.Fd())
+	state, err := disableCanonicalAndEcho(os.Stdin.Fd())
 
 	if err != nil {
 		fmt.Println(err)
@@ -115,32 +116,34 @@ func readMessage(reader *bufio.Reader) error {
 
 	for {
 		// read first character
-		rune, err := reader.ReadByte()
+		character, err := reader.ReadByte()
 
 		if err != nil {
 			return err
 		}
 
 		// return if enter or newline
-		if rune == '\r' || rune == '\n' {
+		if character == '\r' || character == '\n' {
 			return nil
 		}
 
 		// remove character from message
-		if rune == 127 {
-			fmt.Print("\b\b  \b\b")
+		if character == 127 {
 			if len(message) > 1 {
 				message = message[:len(message)-1]
 				fmt.Print("\b \b")
 			} else if len(message) == 1 {
 				fmt.Print("\r\033[2K\rWrite message: ")
 			}
+		}
 
+		if !unicode.IsGraphic(rune(character)) {
 			continue
 		}
 
 		// append character to message
-		message += string(rune)
+		fmt.Print(character)
+		message += string(character)
 	}
 }
 
@@ -157,7 +160,7 @@ func sendMessage(stream pb.Chat_ConnectClient, message string) {
 	fmt.Printf("\033[A\033[2K\rYou wrote: %s\n\r", message)
 }
 
-func disableCanonical(fd uintptr) (*unix.Termios, error) {
+func disableCanonicalAndEcho(fd uintptr) (*unix.Termios, error) {
 	attributes := unix.Termios{}
 
 	if err := termios.Tcgetattr(fd, &attributes); err != nil {
@@ -167,6 +170,7 @@ func disableCanonical(fd uintptr) (*unix.Termios, error) {
 	oldState := attributes
 
 	attributes.Lflag &^= unix.ICANON
+	attributes.Lflag &^= unix.ECHO
 
 	if err := termios.Tcsetattr(fd, termios.TCSANOW, &attributes); err != nil {
 		return nil, err

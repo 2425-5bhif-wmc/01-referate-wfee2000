@@ -97,7 +97,6 @@ func readMessage(reader *bufio.Reader) (string, error) {
 
 		// remove character from message
 		/* if rune == 127 {
-		fmt.Print("\b\b  \b\b")
 		if len(message) > 1 {
 			message = message[:len(message)-1]
 			fmt.Print("\b \b")
@@ -108,7 +107,7 @@ func readMessage(reader *bufio.Reader) (string, error) {
 		continue
 		}*/
 
-		// TODO: append character to message
+		// TODO: print and append character to message
 	}
 }
 
@@ -130,6 +129,7 @@ func disableCanonical(fd uintptr) (*unix.Termios, error) {
 	oldState := attributes
 
 	attributes.Lflag &^= unix.ICANON
+	attributes.Lflag &^= unix.ECHO
 
 	if err := termios.Tcsetattr(fd, termios.TCSANOW, &attributes); err != nil {
 		return nil, err
