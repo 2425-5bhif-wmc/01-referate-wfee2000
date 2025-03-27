@@ -21,9 +21,7 @@ public class ChatMain implements QuarkusApplication {
 
     private static final StringBuilder message = new StringBuilder();
 
-    // Inject gRPC stub
-    @GrpcClient
-    Chat chat;
+    // TODO: Inject gRPC stub
 
     /**
      * Print incoming messages without overwriting the current input line.
@@ -58,18 +56,12 @@ public class ChatMain implements QuarkusApplication {
                 throw new RuntimeException(e);
             }
 
-            // send the message to service
-            emitter.emit(
-                    OutgoingMessage.newBuilder()
-                            .setMessage(message.toString())
-                            .build()
-            );
+            // TODO: send the message to service
 
             // print finished message line
             System.out.printf("\033[A\033[2K\rYou wrote: %s\n\r", message);
 
-            // empty the message
-            message.setLength(0);
+            // TODO: empty the message
         }
     }
 
@@ -95,17 +87,9 @@ public class ChatMain implements QuarkusApplication {
                     continue;
                 }
 
-                // stop reading and return
-                if (character == '\n' || character == '\r') {
-                    System.out.print("\n");
-                    break;
-                }
+                // TODO: stop reading and return
 
-                // delete single character
-                if (character == 127 && !message.isEmpty()) {
-                    System.out.print("\b \b");
-                    message.deleteCharAt(message.length() - 1);
-                }
+                // TODO: delete single character
 
                 controlCharCounter = 0;
 
@@ -118,42 +102,22 @@ public class ChatMain implements QuarkusApplication {
                     continue;
                 }
 
-                // print character to console and append it to message
-                System.out.print(character);
-                message.append(character);
+                // TODO: print character to console and append it to message
             }
         }
     }
 
     @Override
     public int run(String... args) {
-        // claim name from server
-        String token = chat
-                .claimName(
-                        ClaimNameRequest.newBuilder()
-                                .setName(String.join(" ", args))
-                                .build()
-                )
-                .await()
-                .indefinitely()
-                .getToken();
+        // TODO: claim name from server
 
-        // append token in header
-        Metadata headers = new Metadata();
-        headers.put(
-                Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER),
-                String.format("Bearer %s", token)
-        );
+        // TODO: append token in header
 
-        // attach headers to stub
-        Chat authorizedStub = GrpcClientUtils.attachHeaders(chat, headers);
+        // TODO: attach headers to stub
 
-        // create output stream
-        Multi<OutgoingMessage> outgoingStream = Multi.createFrom()
-                .<OutgoingMessage>emitter(ChatMain::SendMessages);
+        // TODO: create output stream
 
-        // connect to service and start printing incoming messages
-        PrintMessages(authorizedStub.connect(outgoingStream));
+        // TODO: connect to service and start printing incoming messages
 
         return 0;
     }

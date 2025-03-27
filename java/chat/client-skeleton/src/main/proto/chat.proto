@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "/proto";
+option java_package = "at.htl.grpc";
+
+service Chat {
+  rpc ClaimName(ClaimNameRequest) returns (ClaimNameResponse) {}
+  rpc Connect(stream OutgoingMessage) returns (stream IncomingMessage) {}
+}
+
+message ClaimNameRequest {
+  string name = 1;
+}
+
+message ClaimNameResponse {
+  string token = 1;
+}
+
+message OutgoingMessage {
+  string message = 1;
+}
+
+message IncomingMessage {
+  string name = 1;
+  string response = 2;
+}
