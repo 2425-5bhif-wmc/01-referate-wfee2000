@@ -31,6 +31,8 @@ https://2425-5bhif-wmc.github.io/01-referate-wfee2000/slides/[Slides]
 
 In den Folder proto werden alle benötigten proto Dateien abgelegt.
 
+image::file-structure.png[]
+
 Mit dem shell command
 
 [source,shell]
@@ -40,7 +42,7 @@ mvn compile
 
 werden alle benötigten Dateien generiert.
 
-Für dieses Beispiel wird ein Service mit folgenden methoden definiert.
+Für dieses Beispiel wird ein Service mit folgenden Methoden definiert.
 
 [source,protobuf]
 ----
@@ -62,7 +64,7 @@ message HelloReply {
 
 === Einen Stub verwenden
 
-Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Services "Injected" werden.
+Um einen Stub in einem Quarkus Projekt zu verwenden, muss nur der Name des Services "Injected" werden.
 
 [source,java]
 ----
@@ -70,7 +72,7 @@ Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Servi
 Greeter greeter;
 ----
 
-<1> Wenn der client-name des stubs nicht angegeben wird, wird stattdessen automatisch der name der Variable benutzt. In diesem Fall wäre dieser `greeter`.
+<1> Wenn der client-name des Stubs nicht angegeben wird, wird stattdessen automatisch der Name der Variable benutzt. In diesem Fall wäre dieser `greeter`.
 
 Dann können alle Methoden, die in den Protofiles definiert worden sind, aufgerufen werden.
 
@@ -88,7 +90,7 @@ Der Host ist dabei per Default "localhost" und der Port ist per Default 9000.
 
 Der client-name wäre in unserem Fall greeter also würde die Konfiguration folgendermaßen aussehen.
 
-[source]
+[source, properties]
 ----
 quarkus.grpc.clients.greeter.host=localhost
 quarkus.grpc.clients.greeter.port=8080
@@ -100,7 +102,7 @@ quarkus.grpc.clients.greeter.port=8080
 
 Falls man den gRPC Service nicht auf einem separaten Server laufen lassen möchte, muss man folgendes in den application.properties eintragen.
 
-[source]
+[source, properties]
 ----
 quarkus.grpc.server.use-separate-server=false
 ----
@@ -131,7 +133,7 @@ include::{javaserver}/GreeterService.java[tag=sayHello]
 In diesem Beispiel müssen wir drei Sachen machen, um unser gRPC Objekt zu kreieren:
 
 <1> Einen neuen Builder des HelloReply typen erstellen
-<2> Unsere Begrüßung in die Eigenschaft message speichern
+<2> Unsere Begrüßung in die Eigenschaft `message` speichern
 <3> Das Objekt bauen
 
 .StreamHello
@@ -156,7 +158,13 @@ In diesem Abschnitt wir ein Stub für ein bereits implementiertes Backend geschr
 
 Der vorgezeigte Programmflow ist folgender:
 
-image::ClientFlow.png[]
+image::client-flow.png[]
+
+=== Skelett
+
+Ein Skelett für diesen Stub kann hier heruntergeladen werden:
+
+link:../../java/chat/client-skeleton.zip[Skelett herunterladen]
 
 === Dependencies
 
@@ -204,7 +212,7 @@ In diesem Proto file sind 2 Prozeduren definiert:
 
 ==== Statische Message
 
-Da wir in mit mehreren Threads arbeiten, die zugleich zugriff, auf die Variable message zugreifen müssen wir diese Variable auf einem Globalen Scope definieren
+Da wir in mit mehreren Threads arbeiten, die zugleich auf die Variable message zugreifen, müssen wir diese Variable in dem Globalen Scope definieren
 
 [source, java]
 ----
@@ -241,7 +249,7 @@ include::{javastubroot}/{javastubcode}/ChatMain.java[tag=makeHeaders]
 <1> Den Header Key spezifizieren
 <2> Den Token als Value angeben
 
-Dieser header muss nun an den Stub gebunden werden.
+Dieser Header muss nun an den Stub gebunden werden.
 
 [source, java]
 ----
@@ -290,7 +298,7 @@ include::{javastubroot}/{javastubcode}/ChatMain.java[tag=sendMessages]
 ----
 
 <1> Als Erstes wird unsere statische message Variable befüllt.
-<2> Mit dieser Variable wird dann durch den emitter unsere Nachricht an den gRPC Service geschickt.
+<2> Mit dieser Variable wird dann durch den Emitter unsere Nachricht an den gRPC Service geschickt.
 <3> Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.
 <4> Zuletzt wird unsere Variable message wieder zurückgesetzt.
 
@@ -305,12 +313,12 @@ include::{javastubroot}/{javastubcode}/ChatMain.java[tag=readMessage]
 ----
 ====
 
-In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit enter beendet.
+In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit Enter beendet.
 
-Das bestimmte flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:
+Das bestimmte Flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:
 
 1. sofort freigegeben wird und nicht erst nach einem Enter
-2. nicht angezeigt wird, so können non-printable characters auf der Konsole umgangen werden
+2. nicht angezeigt wird, so können non-printable Characters auf der Konsole umgangen werden
 
 Dann wird der Input des Users gelesen und in die Variable message gespeichert.
 

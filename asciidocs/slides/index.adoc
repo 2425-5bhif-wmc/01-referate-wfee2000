@@ -45,14 +45,14 @@ Protocol Buffers
 
 === Wozu verwendet man Protobuf
 
-Protobuf ist eine binäre Serialisierungssprache, die Sprachunabhängig ist.
+Protobuf ist eine binäre Serialisierungssprache, die sprachunabhängig ist.
 
 === Typen
 
-Protobuf unterstützt alle Primitiven Datentypen.
+Protobuf unterstützt alle primitiven Datentypen.
 
 Zusätzlich können eigene Datentypen (messages) erstellt werden.
-Innerhalb dieser Typen muss die Position der benutzen eigenschaften definiert werden.
+Innerhalb dieser Typen muss die Position der benutzen Eigenschaften definiert werden.
 
 [source, protobuf]
 ----
@@ -86,7 +86,7 @@ message Person {
 syntax = "proto3";
 ----
 
-Als Erstes muss eine Protobuf version definiert werden, wobei proto3 der standard ist.
+Als Erstes muss eine Protobuf Version definiert werden, wobei proto3 der Standard ist.
 
 [%auto-animate]
 === Proto-File Aufbau
@@ -120,10 +120,11 @@ option java_package = "com.example";
 
 [source, protobuf]
 ----
-service MyService {
-  syntax = "proto3";
+syntax = "proto3";
 
-  option java_package = "com.example";
+option java_package = "com.example";
+
+service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
 }
 ----

@@ -59,7 +59,7 @@ public class ChatMain implements QuarkusApplication {
             // TODO: send the message to service
 
             // print finished message line
-            System.out.printf("\033[A\033[2K\rYou wrote: %s\n\r", message);
+            System.out.printf("\033[2K\rYou wrote: %s\n\r", message);
 
             // TODO: empty the message
         }
