@@ -47,6 +47,10 @@ Protocol Buffers
 
 Protobuf ist eine binäre Serialisierungssprache, die sprachunabhängig ist.
 
+image::proto-workflow.png[width=600]
+
+https://tamerlan.dev/the-beginners-guide-to-grpc-with-examples/
+
 === Typen
 
 Protobuf unterstützt alle primitiven Datentypen.
