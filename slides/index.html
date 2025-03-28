@@ -418,9 +418,9 @@ ul.byline li + li {
 <div class="paragraph"><p><a href="https://www.atatus.com/blog/what-is-grpc-framework" class="bare">https://www.atatus.com/blog/what-is-grpc-framework</a></p></div></div></section></section>
 <section><section id="_verwendung"><h2>Verwendung</h2></section><section id="_netflix"><h2>Netflix</h2><div class="slide-content"><div class="quoteblock"><blockquote>At Netflix, we heavily use gRPC for the purpose of backend to backend communication.</blockquote><div class="attribution"><cite>https://netflixtechblog.com/practical-api-design-at-netflix-part-1-using-protobuf-fieldmask-35cfdc606518</cite><br>&#8212; Netflix</div></div></div></section><section id="_andere"><h2>Andere</h2><div class="slide-content"><div class="ulist"><ul><li><p>Cockroach LABS</p></li><li><p>Cisco</p></li><li><p>Square</p></li></ul></div>
 <div class="paragraph"><p><a href="https://grpc.io/about/" class="bare">https://grpc.io/about/</a></p></div></div></section></section>
-<section><section id="_protobuf"><h2>Protobuf</h2><div class="slide-content"><div class="paragraph"><p>Protocol Buffers</p></div></div></section><section id="_wozu_verwendet_man_protobuf"><h2>Wozu verwendet man Protobuf</h2><div class="slide-content"><div class="paragraph"><p>Protobuf ist eine binäre Serialisierungssprache, die Sprachunabhängig ist.</p></div></div></section><section id="_typen"><h2>Typen</h2><div class="slide-content"><div class="paragraph"><p>Protobuf unterstützt alle Primitiven Datentypen.</p></div>
+<section><section id="_protobuf"><h2>Protobuf</h2><div class="slide-content"><div class="paragraph"><p>Protocol Buffers</p></div></div></section><section id="_wozu_verwendet_man_protobuf"><h2>Wozu verwendet man Protobuf</h2><div class="slide-content"><div class="paragraph"><p>Protobuf ist eine binäre Serialisierungssprache, die sprachunabhängig ist.</p></div></div></section><section id="_typen"><h2>Typen</h2><div class="slide-content"><div class="paragraph"><p>Protobuf unterstützt alle primitiven Datentypen.</p></div>
 <div class="paragraph"><p>Zusätzlich können eigene Datentypen (messages) erstellt werden.
-Innerhalb dieser Typen muss die Position der benutzen eigenschaften definiert werden.</p></div>
+Innerhalb dieser Typen muss die Position der benutzen Eigenschaften definiert werden.</p></div>
 <div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">message MyMessage {
   int32 a = 1;
   string b = 2;
@@ -431,16 +431,17 @@ Innerhalb dieser Typen muss die Position der benutzen eigenschaften definiert we
   repeated string hobbies = 3;
 }</code></pre></div></div></div></section></section>
 <section><section id="_proto_file_aufbau"><h2>Proto-File Aufbau</h2></section><section id="_proto_file_aufbau_2" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Syntax</h3><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">syntax = "proto3";</code></pre></div></div>
-<div class="paragraph"><p>Als Erstes muss eine Protobuf version definiert werden, wobei proto3 der standard ist.</p></div></div></section><section id="_proto_file_aufbau_3" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Package</h3><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">syntax = "proto3";
+<div class="paragraph"><p>Als Erstes muss eine Protobuf Version definiert werden, wobei proto3 der Standard ist.</p></div></div></section><section id="_proto_file_aufbau_3" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Package</h3><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">syntax = "proto3";
 
 package my_package;</code></pre></div></div>
 <div class="paragraph"><p>Optional kann ein Package angegeben werden, falls es bei mehreren Files gleiche Message Names gibt.</p></div></div></section><section id="_proto_file_aufbau_4" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Options</h3><div class="paragraph"><p>Mit dem <code>option</code> Keyword können compile flags befüllt werden.</p></div>
 <div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">syntax = "proto3";
 
-option java_package = "com.example";</code></pre></div></div></div></section><section id="_proto_file_aufbau_5" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Services</h3><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">service MyService {
-  syntax = "proto3";
+option java_package = "com.example";</code></pre></div></div></div></section><section id="_proto_file_aufbau_5" data-auto-animate><h2>Proto-File Aufbau</h2><div class="slide-content"><h3>Services</h3><div class="listingblock"><div class="content"><pre class="highlightjs highlight"><code class="language-protobuf hljs" data-noescape="true" data-lang="protobuf">syntax = "proto3";
 
-  option java_package = "com.example";
+option java_package = "com.example";
+
+service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
 }</code></pre></div></div>
 <div class="paragraph"><p>Mit einem Service definiert man alle Methoden (Schnittstellen), die man in gRPC verwenden möchte.</p></div></div></section></section>
