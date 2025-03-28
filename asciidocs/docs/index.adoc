@@ -340,9 +340,9 @@ mvn clean package && java -jar target/client-1.0-SNAPSHOT-runner.jar <name>
 
 == Quellen
 
-https://quarkus.io/guides/grpc-service-consumption
-https://quarkus.io/guides/grpc-getting-started
-https://quarkus.io/guides/grpc-service-implementation
-https://quarkus.io/guides/grpc-reference
-https://grpc.io/docs/what-is-grpc/core-concepts/
-https://grpc.io/docs/what-is-grpc/introduction/
+https://quarkus.io/guides/grpc-service-consumption +
+https://quarkus.io/guides/grpc-getting-started +
+https://quarkus.io/guides/grpc-service-implementation +
+https://quarkus.io/guides/grpc-reference +
+https://grpc.io/docs/what-is-grpc/core-concepts +
+https://grpc.io/docs/what-is-grpc/introduction +
