@@ -20,7 +20,7 @@ https://grpc.io/docs/what-is-grpc/introduction
 
 === Model
 
-image::grpc-model.png[width=1000]
+image::grpc-model.png[width=300]
 
 https://www.atatus.com/blog/what-is-grpc-framework
 
