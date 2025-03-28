@@ -45,7 +45,7 @@ message MyMessage {
 }
 ----
 
-==== Listen
+=== Listen
 
 Mit dem `repeated` Keyword kann man eine Liste von Messages erstellen.
 
@@ -58,6 +58,7 @@ message Person {
 }
 ----
 
+[%auto-animate]
 === Proto-File Aufbau
 ==== Syntax
 
@@ -68,6 +69,7 @@ syntax = "proto3";
 
 Als Erstes muss eine Protobuf version definiert werden, wobei proto3 der standard ist.
 
+[%auto-animate]
 === Proto-File Aufbau
 ==== Package
 
@@ -80,10 +82,11 @@ package my_package;
 
 Optional kann ein Package angegeben werden, falls es bei mehreren Files gleiche Message Names gibt.
 
+[%auto-animate]
 === Proto-File Aufbau
 ==== Options
 
-Mit dem `optional` Keyword können kompilier flags befüllt werden.
+Mit dem `option` Keyword können compile flags befüllt werden.
 
 [source, protobuf]
 ----
@@ -92,6 +95,9 @@ syntax = "proto3";
 option java_package = "com.example";
 ----
 
+== Proto-File Aufbau
+
+[%auto-animate]
 === Proto-File Aufbau
 ==== Services
 
@@ -107,8 +113,10 @@ service MyService {
 
 Mit einem Service definiert man alle Methoden (Schnittstellen), die man in gRPC verwenden möchte.
 
-=== Methoden Typen
+== Methoden Typen
 
+[%auto-animate]
+=== Methoden Typen
 ==== Unary
 
 [source, protobuf]
@@ -116,30 +124,36 @@ Mit einem Service definiert man alle Methoden (Schnittstellen), die man in gRPC 
 rpc SayHello(HelloRequest) returns (HelloResponse);
 ----
 
+[%auto-animate]
 === Methoden Typen
-
 ==== Server Side Streaming
 
 [source, protobuf]
 ----
+rpc SayHello(HelloRequest) returns (HelloResponse);
 rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse);
 ----
 
+[%auto-animate]
 === Methoden Typen
-
 ==== Client Side Streaming
 
 [source, protobuf]
 ----
+rpc SayHello(HelloRequest) returns (HelloResponse);
+rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse);
 rpc LotsOfGreetings(stream HelloRequest) returns (HelloResponse);
 ----
 
+[%auto-animate]
 === Methoden Typen
-
 ==== Bidirectional Streaming
 
 [source, protobuf]
 ----
+rpc SayHello(HelloRequest) returns (HelloResponse);
+rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse);
+rpc LotsOfGreetings(stream HelloRequest) returns (HelloResponse);
 rpc BidiHello(stream HelloRequest) returns (stream HelloResponse);
 ----
 
