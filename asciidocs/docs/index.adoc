@@ -164,7 +164,7 @@ image::client-flow.png[]
 
 Ein Skelett für diesen Stub kann hier heruntergeladen werden:
 
-link:../../java/chat/client-skeleton.zip[Skelett herunterladen]
+link:download/client-skeleton.zip[Skelett herunterladen]
 
 === Dependencies
 
