@@ -183,8 +183,7 @@ JLine ermöglicht die OS-spezifische Interaktion mit Konsolen.
 
 [source, properties]
 ----
-quarkus.grpc.clients.chat.host=winnie.at
-quarkus.grpc.clients.chat.port=80
+include::{javastubroot}/main/resources/application.properties[]
 ----
 
 Für den Stub (chat) muss sowohl der Port als auch der Host des Backends spezifiziert werden.

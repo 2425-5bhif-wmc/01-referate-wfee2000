@@ -18,6 +18,10 @@ image::grpc-architekture.png[width=600]
 
 https://grpc.io/docs/what-is-grpc/introduction
 
+== Verwendung
+
+=== Netflix
+
 == Protobuf
 
 Protocol Buffers
@@ -55,7 +59,6 @@ message Person {
 ----
 
 === Proto-File Aufbau
-
 ==== Syntax
 
 [source, protobuf]
@@ -65,6 +68,7 @@ syntax = "proto3";
 
 Als Erstes muss eine Protobuf version definiert werden, wobei proto3 der standard ist.
 
+=== Proto-File Aufbau
 ==== Package
 
 [source, protobuf]
@@ -77,7 +81,6 @@ package my_package;
 Optional kann ein Package angegeben werden, falls es bei mehreren Files gleiche Message Names gibt.
 
 === Proto-File Aufbau
-
 ==== Options
 
 Mit dem `optional` Keyword können kompilier flags befüllt werden.
@@ -89,6 +92,7 @@ syntax = "proto3";
 option java_package = "com.example";
 ----
 
+=== Proto-File Aufbau
 ==== Services
 
 [source, protobuf]
@@ -102,6 +106,42 @@ service MyService {
 ----
 
 Mit einem Service definiert man alle Methoden (Schnittstellen), die man in gRPC verwenden möchte.
+
+=== Methoden Typen
+
+==== Unary
+
+[source, protobuf]
+----
+rpc SayHello(HelloRequest) returns (HelloResponse);
+----
+
+=== Methoden Typen
+
+==== Server Side Streaming
+
+[source, protobuf]
+----
+rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse);
+----
+
+=== Methoden Typen
+
+==== Client Side Streaming
+
+[source, protobuf]
+----
+rpc LotsOfGreetings(stream HelloRequest) returns (HelloResponse);
+----
+
+=== Methoden Typen
+
+==== Bidirectional Streaming
+
+[source, protobuf]
+----
+rpc BidiHello(stream HelloRequest) returns (stream HelloResponse);
+----
 
 == gRPC-Web
 
