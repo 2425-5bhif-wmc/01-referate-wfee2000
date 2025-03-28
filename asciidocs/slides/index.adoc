@@ -18,9 +18,26 @@ image::grpc-architekture.png[width=600]
 
 https://grpc.io/docs/what-is-grpc/introduction
 
+=== Model
+
+image::grpc-model.png[width=1000]
+
+https://www.atatus.com/blog/what-is-grpc-framework
+
 == Verwendung
 
 === Netflix
+
+[quote, Netflix, https://netflixtechblog.com/practical-api-design-at-netflix-part-1-using-protobuf-fieldmask-35cfdc606518]
+At Netflix, we heavily use gRPC for the purpose of backend to backend communication.
+
+=== Andere
+
+* Cockroach LABS
+* Cisco
+* Square
+
+https://grpc.io/about/
 
 == Protobuf
 
@@ -58,6 +75,8 @@ message Person {
 }
 ----
 
+== Proto-File Aufbau
+
 [%auto-animate]
 === Proto-File Aufbau
 ==== Syntax
@@ -94,8 +113,6 @@ syntax = "proto3";
 
 option java_package = "com.example";
 ----
-
-== Proto-File Aufbau
 
 [%auto-animate]
 === Proto-File Aufbau
