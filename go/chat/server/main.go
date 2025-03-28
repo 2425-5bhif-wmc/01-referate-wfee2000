@@ -4,6 +4,7 @@ import (
 	pb "chat/proto"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"slices"
@@ -153,18 +154,22 @@ func (s *server) broadcastMessages(conn *connection) error {
 }
 
 func (s *server) reactToError(err error, conn *connection) {
+	s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
+
+	for _, c := range s.connections[conn.index:] {
+		c.index--
+	}
+
+	s.names[conn.name] = false
+
 	if err, ok := status.FromError(err); ok {
-		s.connections = slices.Delete(s.connections, conn.index, conn.index+1)
-
-		for _, c := range s.connections[conn.index:] {
-			c.index--
-		}
-
-		s.names[conn.name] = false
-
 		if err.Code() == codes.Canceled {
 			return
 		}
+	}
+
+	if err == io.EOF {
+		return
 	}
 
 	fmt.Printf("%s encountered error: %v\n", conn.name, err)
