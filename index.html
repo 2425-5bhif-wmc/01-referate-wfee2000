@@ -571,7 +571,14 @@ pre.rouge .gs {
 <li><a href="#_protobuf">2.2. Protobuf</a></li>
 <li><a href="#_einen_stub_verwenden">2.3. Einen Stub verwenden</a></li>
 <li><a href="#_einen_service_implementieren">2.4. Einen Service Implementieren</a></li>
-<li><a href="#_demo_streaming_applikation_go">2.5. Demo Streaming Applikation (go)</a></li>
+</ul>
+</li>
+<li><a href="#_chat_stub">3. Chat Stub</a>
+<ul class="sectlevel2">
+<li><a href="#_dependencies_2">3.1. Dependencies</a></li>
+<li><a href="#_konfiguration_3">3.2. Konfiguration</a></li>
+<li><a href="#_protocol_buffer">3.3. Protocol Buffer</a></li>
+<li><a href="#_implementierung_2">3.4. Implementierung</a></li>
 </ul>
 </li>
 </ul>
@@ -645,9 +652,17 @@ pre.rouge .gs {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nd">@GrpcClient</span>
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@GrpcClient</span><span class="c1">//(client-name) </span><i class="conum" data-value="1"></i><b>(1)</b>
 <span class="nc">Greeter</span> <span class="n">greeter</span><span class="o">;</span></code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Wenn der client-name des stubs nicht angegeben wird, wird stattdessen automatisch der name der Variable benutzt. In diesem Fall wäre dieser <code>greeter</code>.</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Dann können alle Methoden, die in den Protofiles definiert worden sind, aufgerufen werden.</p>
@@ -786,16 +801,426 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 </div>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chat_stub"><a class="anchor" href="#_chat_stub"></a>3. Chat Stub</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In diesem Abschnitt wir ein Stub für ein bereits implementiertes Backend geschrieben.</p>
+</div>
+<div class="paragraph">
+<p>Der vorgezeigte Programmflow ist folgender:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/ClientFlow.png" alt="ClientFlow">
+</div>
+</div>
 <div class="sect2">
-<h3 id="_demo_streaming_applikation_go"><a class="anchor" href="#_demo_streaming_applikation_go"></a>2.5. Demo Streaming Applikation (go)</h3>
+<h3 id="_dependencies_2"><a class="anchor" href="#_dependencies_2"></a>3.1. Dependencies</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="xml"><span class="nt">&lt;dependencies&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>io.quarkus<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>quarkus-grpc<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.jline<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>jline-reader<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>3.29.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;/dependencies&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Neben der Quarkus gRPC Dependency brauchen wir auch JLine.</p>
+</div>
+<div class="paragraph">
+<p>JLine ermöglicht die OS-spezifische Interaktion mit Konsolen.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_konfiguration_3"><a class="anchor" href="#_konfiguration_3"></a>3.2. Konfiguration</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="properties"><span class="py">quarkus.grpc.clients.chat.host</span><span class="p">=</span><span class="s">winnie.at</span>
+<span class="py">quarkus.grpc.clients.chat.port</span><span class="p">=</span><span class="s">80</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Für den Stub (chat) muss sowohl der Port als auch der Host des Backends spezifiziert werden.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_protocol_buffer"><a class="anchor" href="#_protocol_buffer"></a>3.3. Protocol Buffer</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
 
+<span class="k">option</span> <span class="na">go_package</span> <span class="o">=</span> <span class="s">"/proto"</span><span class="p">;</span>
+<span class="k">option</span> <span class="na">java_package</span> <span class="o">=</span> <span class="s">"at.htl.grpc"</span><span class="p">;</span>
+
+<span class="kd">service</span> <span class="n">Chat</span> <span class="p">{</span>
+  <span class="k">rpc</span> <span class="n">ClaimName</span><span class="p">(</span><span class="n">ClaimNameRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ClaimNameResponse</span><span class="p">)</span> <span class="p">{}</span> <i class="conum" data-value="1"></i><b>(1)</b>
+  <span class="k">rpc</span> <span class="n">Connect</span><span class="p">(</span><span class="n">stream</span> <span class="n">OutgoingMessage</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">IncomingMessage</span><span class="p">)</span> <span class="p">{}</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">ClaimNameRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">ClaimNameResponse</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">token</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">OutgoingMessage</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="kd">message</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">IncomingMessage</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">response</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In diesem Proto file sind 2 Prozeduren definiert:</p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Einen Namen reservieren &#8658; JWT als response</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>JWT im Header &#8658; Am Chat teilnehmen</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementierung_2"><a class="anchor" href="#_implementierung_2"></a>3.4. Implementierung</h3>
+<div class="sect3">
+<h4 id="_statische_message"><a class="anchor" href="#_statische_message"></a>3.4.1. Statische Message</h4>
+<div class="paragraph">
+<p>Da wir in mit mehreren Threads arbeiten, die zugleich zugriff, auf die Variable message zugreifen müssen wir diese Variable auf einem Globalen Scope definieren</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">StringBuilder</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_stub_injection"><a class="anchor" href="#_stub_injection"></a>3.4.2. Stub Injection</h4>
+<div class="paragraph">
+<p>In unserem Programm muss als erstes der gRPC Stub Injected werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="c1">// Inject gRPC stub</span>
+    <span class="nd">@GrpcClient</span>
+    <span class="nc">Chat</span> <span class="n">chat</span><span class="o">;</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_jwt_abfragen"><a class="anchor" href="#_jwt_abfragen"></a>3.4.3. JWT Abfragen</h4>
+<div class="paragraph">
+<p>Dann muss ein Name reserviert werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">run</span><span class="o">(</span><span class="nc">String</span><span class="o">...</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// claim name from server</span>
+        <span class="nc">String</span> <span class="n">token</span> <span class="o">=</span> <span class="n">chat</span>
+                <span class="o">.</span><span class="na">claimName</span><span class="o">(</span>
+                        <span class="nc">ClaimNameRequest</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+                                <span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="s">" "</span><span class="o">,</span> <span class="n">args</span><span class="o">))</span>
+                                <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+                <span class="o">)</span>
+                <span class="o">.</span><span class="na">await</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">indefinitely</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">getToken</span><span class="o">();</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_jwt_in_den_header"><a class="anchor" href="#_jwt_in_den_header"></a>3.4.4. JWT in den Header</h4>
+<div class="paragraph">
+<p>Um den JWT dem gRPC konform zu übermitteln, muss er in den Header gespeichert werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="c1">// append token in header</span>
+        <span class="nc">Metadata</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Metadata</span><span class="o">();</span>
+        <span class="n">headers</span><span class="o">.</span><span class="na">put</span><span class="o">(</span>
+                <span class="nc">Key</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"authorization"</span><span class="o">,</span> <span class="nc">Metadata</span><span class="o">.</span><span class="na">ASCII_STRING_MARSHALLER</span><span class="o">),</span> <i class="conum" data-value="1"></i><b>(1)</b>
+                <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"Bearer %s"</span><span class="o">,</span> <span class="n">token</span><span class="o">)</span> <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Den Header Key spezifizieren</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Den Token als Value angeben</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Dieser header muss nun an den Stub gebunden werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="c1">// attach headers to stub</span>
+        <span class="nc">Chat</span> <span class="n">authorizedStub</span> <span class="o">=</span> <span class="nc">GrpcClientUtils</span><span class="o">.</span><span class="na">attachHeaders</span><span class="o">(</span><span class="n">chat</span><span class="o">,</span> <span class="n">headers</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Von nun an wird nur mehr der <code>authorizedStub</code> verwendet, da der normale Stub keine Authentifizierung hat.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_output_stream_erstellen"><a class="anchor" href="#_output_stream_erstellen"></a>3.4.5. Output Stream erstellen</h4>
+<div class="paragraph">
+<p>Um die Verbindung zu öffnen, muss ein Multi erstellt werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="c1">// create output stream</span>
+        <span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">OutgoingMessage</span><span class="o">&gt;</span> <span class="n">outgoingStream</span> <span class="o">=</span> <span class="nc">Multi</span><span class="o">.</span><span class="na">createFrom</span><span class="o">()</span>
+                <span class="o">.&lt;</span><span class="nc">OutgoingMessage</span><span class="o">&gt;</span><span class="n">emitter</span><span class="o">(</span><span class="nl">ChatMain:</span><span class="o">:</span><span class="nc">SendMessages</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Dieser Multi wird von unserer Methode SendMessages befüllt (seeded).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verbinden"><a class="anchor" href="#_verbinden"></a>3.4.6. Verbinden</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">        <span class="c1">// connect to service and start printing incoming messages</span>
+        <span class="nc">PrintMessages</span><span class="o">(</span><span class="n">authorizedStub</span><span class="o">.</span><span class="na">connect</span><span class="o">(</span><span class="n">outgoingStream</span><span class="o">));</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nun wird sich mit dem gRPC Service verbunden und der Stream mit den empfangenen Nachrichten wird direkt an die Methode PrintMessages weitergegeben.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_nachrichten_ausgeben"><a class="anchor" href="#_nachrichten_ausgeben"></a>3.4.7. Nachrichten Ausgeben</h4>
+<div class="paragraph">
+<p>Da der User auf der Konsole seine eigene Nachricht eingibt, soll nicht über die Nachricht des Users mit anderen Nachrichten geschrieben werden.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="cm">/**
+     * Print incoming messages without overwriting the current input line.
+     *
+     * @param incomingStream stream with incoming messages
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">PrintMessages</span><span class="o">(</span><span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">IncomingMessage</span><span class="o">&gt;</span> <span class="n">incomingStream</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">incomingStream</span>
+                <span class="o">.</span><span class="na">subscribe</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="n">incomingMessage</span> <span class="o">-&gt;</span>
+                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span>
+                                <span class="s">"\033[2K\r%s: %s\n\rWrite message: %s"</span><span class="o">,</span>
+                                <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span>
+                                <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span>
+                                <span class="n">message</span>
+                        <span class="o">));</span>
+    <span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wenn eine Nachricht empfangen wird, wird zuerst die momentane Zeile komplett gelöscht.
+Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nächsten Zeile der Prompt an den User wieder hergestellt.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_nachrichten_senden"><a class="anchor" href="#_nachrichten_senden"></a>3.4.8. Nachrichten Senden</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="cm">/**
+     * Read input from CLI and send it to service.
+     *
+     * @param emitter the emitter that sends messages back to the service
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">SendMessages</span><span class="o">(</span>
+            <span class="nc">MultiEmitter</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="nc">OutgoingMessage</span><span class="o">&gt;</span> <span class="n">emitter</span>
+    <span class="o">)</span> <span class="o">{</span>
+        <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">// fill the message with user input</span>
+                <span class="n">readMessage</span><span class="o">();</span> <i class="conum" data-value="1"></i><b>(1)</b>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+            <span class="o">}</span>
+
+            <span class="c1">// send the message to service</span>
+            <span class="n">emitter</span><span class="o">.</span><span class="na">emit</span><span class="o">(</span> <i class="conum" data-value="2"></i><b>(2)</b>
+                    <span class="nc">OutgoingMessage</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+                            <span class="o">.</span><span class="na">setMessage</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">toString</span><span class="o">())</span>
+                            <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+            <span class="o">);</span>
+
+            <span class="c1">// print finished message line</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"\033[2K\rYou wrote: %s\n\r"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span> <i class="conum" data-value="3"></i><b>(3)</b>
+
+            <span class="c1">// empty the message</span>
+            <span class="n">message</span><span class="o">.</span><span class="na">setLength</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <i class="conum" data-value="4"></i><b>(4)</b>
+        <span class="o">}</span>
+    <span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Als Erstes wird unsere statische message Variable befüllt.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Mit dieser Variable wird dann durch den emitter unsere Nachricht an den gRPC Service geschickt.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Zuletzt wird unsere Variable message wieder zurückgesetzt.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_nachrichten_einlesen"><a class="anchor" href="#_nachrichten_einlesen"></a>3.4.9. Nachrichten Einlesen</h4>
+<details>
+<summary class="title">Implementierung</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java">    <span class="cm">/**
+     * Read string from CLI without control characters.
+     *
+     * @throws IOException if the connection to the terminal cannot be established
+     */</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">readMessage</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"Write message: "</span><span class="o">);</span>
+
+        <span class="k">try</span> <span class="o">(</span><span class="nc">Terminal</span> <span class="n">terminal</span> <span class="o">=</span> <span class="nc">TerminalBuilder</span><span class="o">.</span><span class="na">terminal</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// strip flags from terminal</span>
+            <span class="n">terminal</span><span class="o">.</span><span class="na">enterRawMode</span><span class="o">();</span>
+            <span class="kt">int</span> <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// read one character from the console</span>
+                <span class="kt">char</span> <span class="n">character</span> <span class="o">=</span> <span class="o">(</span><span class="kt">char</span><span class="o">)</span> <span class="n">terminal</span><span class="o">.</span><span class="na">reader</span><span class="o">().</span><span class="na">read</span><span class="o">();</span>
+
+                <span class="k">if</span> <span class="o">((</span><span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'['</span><span class="o">)</span> <span class="o">||</span> <span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">controlCharCounter</span><span class="o">--;</span>
+                    <span class="k">continue</span><span class="o">;</span>
+                <span class="o">}</span>
+
+                <span class="c1">// stop reading and return</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="sc">'\n'</span> <span class="o">||</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'\r'</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">return</span><span class="o">;</span>
+                <span class="o">}</span>
+
+                <span class="c1">// delete single character</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">127</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">message</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"\b \b"</span><span class="o">);</span>
+                    <span class="n">message</span><span class="o">.</span><span class="na">deleteCharAt</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">);</span>
+                <span class="o">}</span>
+
+                <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">27</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
+                <span class="o">}</span>
+
+                <span class="c1">// do not display/send control characters</span>
+                <span class="k">if</span> <span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">isISOControl</span><span class="o">(</span><span class="n">character</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="k">continue</span><span class="o">;</span>
+                <span class="o">}</span>
+
+                <span class="c1">// print character to console and append it to message</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
+                <span class="n">message</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit enter beendet.</p>
+</div>
+<div class="paragraph">
+<p>Das bestimmte flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>sofort freigegeben wird und nicht erst nach einem Enter</p>
+</li>
+<li>
+<p>nicht angezeigt wird, so können non-printable characters auf der Konsole umgangen werden</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Dann wird der Input des Users gelesen und in die Variable message gespeichert.</p>
+</div>
+<div class="paragraph">
+<p>Bei einem Enter wird die aus dieser Methode returned.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ausführung"><a class="anchor" href="#_ausführung"></a>3.4.10. Ausführung</h4>
+<div class="paragraph">
+<p>Da die Applikation stdin blockiert kann sie nicht im dev mode gestartet werden.</p>
+</div>
+<details>
+<summary class="title">Quarkus-CLI</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">quarkus build <span class="nt">--clean</span> <span class="o">&amp;&amp;</span> java <span class="nt">-jar</span> target/client-1.0-SNAPSHOT-runner.jar &lt;name&gt;</code></pre>
+</div>
+</div>
+</div>
+</details>
+<details>
+<summary class="title">Maven</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">mvn clean package <span class="o">&amp;&amp;</span> java <span class="nt">-jar</span> target/client-1.0-SNAPSHOT-runner.jar &lt;name&gt;</code></pre>
+</div>
+</div>
+</div>
+</details>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-25 20:08:44 UTC
+Last updated 2025-03-28 00:55:53 UTC
 </div>
 </div>
 </body>
