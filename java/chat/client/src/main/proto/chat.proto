@@ -4,8 +4,8 @@ option go_package = "/proto";
 option java_package = "at.htl.grpc";
 
 service Chat {
-  rpc ClaimName(ClaimNameRequest) returns (ClaimNameResponse) {}
-  rpc Connect(stream OutgoingMessage) returns (stream IncomingMessage) {}
+  rpc ClaimName(ClaimNameRequest) returns (ClaimNameResponse) {} // <1>
+  rpc Connect(stream OutgoingMessage) returns (stream IncomingMessage) {} // <2>
 }
 
 message ClaimNameRequest {

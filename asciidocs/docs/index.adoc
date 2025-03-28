@@ -4,6 +4,8 @@
 :source-highlighter: rouge
 
 :javaserver: ../../java/demo/server/src/main/java/at/htl/grpc
+:javastubroot: ../../java/chat/client/src
+:javastubcode: main/java/at/htl/grpc
 
 ifdef::env-idea[]
 :imagesdir: ./images
@@ -64,9 +66,11 @@ Um einen Stub in einem Quarkus projekt zu verwenden, muss nur der Name des Servi
 
 [source,java]
 ----
-@GrpcClient
+@GrpcClient//(client-name) <1>
 Greeter greeter;
 ----
+
+<1> Wenn der client-name des stubs nicht angegeben wird, wird stattdessen automatisch der name der Variable benutzt. In diesem Fall wäre dieser `greeter`.
 
 Dann können alle Methoden, die in den Protofiles definiert worden sind, aufgerufen werden.
 
@@ -146,4 +150,191 @@ Hier gibt es 3 grobe Abschnitte
 <2> Diese Referenz immer dann neu setzten, wenn der Stub/Client einen neuen Namen schickt
 <3> Alle Sekunden eine Begrüßung mit dem Momentan gesetzten Namen an den Stub/Client schicken
 
-=== Demo Streaming Applikation (go)
+== Chat Stub
+
+In diesem Abschnitt wir ein Stub für ein bereits implementiertes Backend geschrieben.
+
+Der vorgezeigte Programmflow ist folgender:
+
+image::ClientFlow.png[]
+
+=== Dependencies
+
+[source, xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-grpc</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.jline</groupId>
+        <artifactId>jline-reader</artifactId>
+        <version>3.29.0</version>
+    </dependency>
+</dependencies>
+----
+
+Neben der Quarkus gRPC Dependency brauchen wir auch JLine.
+
+JLine ermöglicht die OS-spezifische Interaktion mit Konsolen.
+
+=== Konfiguration
+
+[source, properties]
+----
+quarkus.grpc.clients.chat.host=winnie.at
+quarkus.grpc.clients.chat.port=80
+----
+
+Für den Stub (chat) muss sowohl der Port als auch der Host des Backends spezifiziert werden.
+
+=== Protocol Buffer
+
+[source, protobuf]
+----
+include::{javastubroot}/main/proto/chat.proto[]
+----
+
+In diesem Proto file sind 2 Prozeduren definiert:
+
+<1> Einen Namen reservieren => JWT als response
+<2> JWT im Header => Am Chat teilnehmen
+
+=== Implementierung
+
+==== Statische Message
+
+Da wir in mit mehreren Threads arbeiten, die zugleich zugriff, auf die Variable message zugreifen müssen wir diese Variable auf einem Globalen Scope definieren
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=message]
+----
+
+==== Stub Injection
+
+In unserem Programm muss als erstes der gRPC Stub Injected werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=injectStub]
+----
+
+==== JWT Abfragen
+
+Dann muss ein Name reserviert werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=getToken]
+----
+
+==== JWT in den Header
+
+Um den JWT dem gRPC konform zu übermitteln, muss er in den Header gespeichert werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=makeHeaders]
+----
+
+<1> Den Header Key spezifizieren
+<2> Den Token als Value angeben
+
+Dieser header muss nun an den Stub gebunden werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=bindHeaders]
+----
+
+Von nun an wird nur mehr der `authorizedStub` verwendet, da der normale Stub keine Authentifizierung hat.
+
+==== Output Stream erstellen
+
+Um die Verbindung zu öffnen, muss ein Multi erstellt werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=createMulti]
+----
+
+Dieser Multi wird von unserer Methode SendMessages befüllt (seeded).
+
+==== Verbinden
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=connect]
+----
+
+Nun wird sich mit dem gRPC Service verbunden und der Stream mit den empfangenen Nachrichten wird direkt an die Methode PrintMessages weitergegeben.
+
+==== Nachrichten Ausgeben
+
+Da der User auf der Konsole seine eigene Nachricht eingibt, soll nicht über die Nachricht des Users mit anderen Nachrichten geschrieben werden.
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=printMessages]
+----
+
+Wenn eine Nachricht empfangen wird, wird zuerst die momentane Zeile komplett gelöscht.
+Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nächsten Zeile der Prompt an den User wieder hergestellt.
+
+==== Nachrichten Senden
+
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=sendMessages]
+----
+
+<1> Als Erstes wird unsere statische message Variable befüllt.
+<2> Mit dieser Variable wird dann durch den emitter unsere Nachricht an den gRPC Service geschickt.
+<3> Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.
+<4> Zuletzt wird unsere Variable message wieder zurückgesetzt.
+
+==== Nachrichten Einlesen
+
+.Implementierung
+[%collapsible]
+====
+[source, java]
+----
+include::{javastubroot}/{javastubcode}/ChatMain.java[tag=readMessage]
+----
+====
+
+In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit enter beendet.
+
+Das bestimmte flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:
+
+1. sofort freigegeben wird und nicht erst nach einem Enter
+2. nicht angezeigt wird, so können non-printable characters auf der Konsole umgangen werden
+
+Dann wird der Input des Users gelesen und in die Variable message gespeichert.
+
+Bei einem Enter wird die aus dieser Methode returned.
+
+==== Ausführung
+
+Da die Applikation stdin blockiert kann sie nicht im dev mode gestartet werden.
+
+.Quarkus-CLI
+[%collapsible]
+====
+[source, bash]
+----
+quarkus build --clean && java -jar target/client-1.0-SNAPSHOT-runner.jar <name>
+----
+====
+
+.Maven
+[%collapsible]
+====
+[source, bash]
+----
+mvn clean package && java -jar target/client-1.0-SNAPSHOT-runner.jar <name>
+----
+====

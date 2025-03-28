@@ -19,12 +19,17 @@ import java.io.IOException;
 @QuarkusMain
 public class ChatMain implements QuarkusApplication {
 
+    // tag::message[]
     private static final StringBuilder message = new StringBuilder();
+    // end::message[]
 
+    // tag::injectStub[]
     // Inject gRPC stub
     @GrpcClient
     Chat chat;
+    // end::injectStub[]
 
+    // tag::printMessages[]
     /**
      * Print incoming messages without overwriting the current input line.
      *
@@ -41,7 +46,9 @@ public class ChatMain implements QuarkusApplication {
                                 message
                         ));
     }
+    // end::printMessages[]
 
+    // tag::sendMessages[]
     /**
      * Read input from CLI and send it to service.
      *
@@ -53,26 +60,28 @@ public class ChatMain implements QuarkusApplication {
         while (true) {
             try {
                 // fill the message with user input
-                readMessage();
+                readMessage(); // <1>
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             // send the message to service
-            emitter.emit(
+            emitter.emit( // <2>
                     OutgoingMessage.newBuilder()
                             .setMessage(message.toString())
                             .build()
             );
 
             // print finished message line
-            System.out.printf("\033[A\033[2K\rYou wrote: %s\n\r", message);
+            System.out.printf("\033[2K\rYou wrote: %s\n\r", message); // <3>
 
             // empty the message
-            message.setLength(0);
+            message.setLength(0); // <4>
         }
     }
+    // end::sendMessages[]
 
+    // tag::readMessage[]
     /**
      * Read string from CLI without control characters.
      *
@@ -97,8 +106,7 @@ public class ChatMain implements QuarkusApplication {
 
                 // stop reading and return
                 if (character == '\n' || character == '\r') {
-                    System.out.print("\n");
-                    break;
+                    return;
                 }
 
                 // delete single character
@@ -124,7 +132,9 @@ public class ChatMain implements QuarkusApplication {
             }
         }
     }
+    // end::readMessage[]
 
+    // tag::getToken[]
     @Override
     public int run(String... args) {
         // claim name from server
@@ -137,23 +147,32 @@ public class ChatMain implements QuarkusApplication {
                 .await()
                 .indefinitely()
                 .getToken();
+        // end::getToken[]
 
+        // tag::makeHeaders[]
         // append token in header
         Metadata headers = new Metadata();
         headers.put(
-                Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER),
-                String.format("Bearer %s", token)
+                Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), // <1>
+                String.format("Bearer %s", token) // <2>
         );
+        // end::makeHeaders[]
 
+        // tag::bindHeaders[]
         // attach headers to stub
         Chat authorizedStub = GrpcClientUtils.attachHeaders(chat, headers);
+        // end::bindHeaders[]
 
+        // tag::createMulti[]
         // create output stream
         Multi<OutgoingMessage> outgoingStream = Multi.createFrom()
                 .<OutgoingMessage>emitter(ChatMain::SendMessages);
+        // end::createMulti[]
 
+        // tag::connect[]
         // connect to service and start printing incoming messages
         PrintMessages(authorizedStub.connect(outgoingStream));
+        // end::connect[]
 
         return 0;
     }
