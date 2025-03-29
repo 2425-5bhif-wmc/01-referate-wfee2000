@@ -956,14 +956,14 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
     <span class="kd">public</span> <span class="kt">int</span> <span class="nf">run</span><span class="o">(</span><span class="nc">String</span><span class="o">...</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
         <span class="c1">// claim name from server</span>
         <span class="nc">String</span> <span class="n">token</span> <span class="o">=</span> <span class="n">chat</span>
-                <span class="o">.</span><span class="na">claimName</span><span class="o">(</span>
-                        <span class="nc">ClaimNameRequest</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
-                                <span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="s">" "</span><span class="o">,</span> <span class="n">args</span><span class="o">))</span>
-                                <span class="o">.</span><span class="na">build</span><span class="o">()</span>
-                <span class="o">)</span>
-                <span class="o">.</span><span class="na">await</span><span class="o">()</span>
-                <span class="o">.</span><span class="na">indefinitely</span><span class="o">()</span>
-                <span class="o">.</span><span class="na">getToken</span><span class="o">();</span></code></pre>
+            <span class="o">.</span><span class="na">claimName</span><span class="o">(</span>
+                <span class="nc">ClaimNameRequest</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+                    <span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="s">" "</span><span class="o">,</span> <span class="n">args</span><span class="o">))</span>
+                    <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+            <span class="o">)</span>
+            <span class="o">.</span><span class="na">await</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">indefinitely</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">getToken</span><span class="o">();</span></code></pre>
 </div>
 </div>
 </div>
@@ -977,8 +977,8 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 <pre class="rouge highlight"><code data-lang="java">        <span class="c1">// append token in header</span>
         <span class="nc">Metadata</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Metadata</span><span class="o">();</span>
         <span class="n">headers</span><span class="o">.</span><span class="na">put</span><span class="o">(</span>
-                <span class="nc">Key</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"authorization"</span><span class="o">,</span> <span class="nc">Metadata</span><span class="o">.</span><span class="na">ASCII_STRING_MARSHALLER</span><span class="o">),</span> <i class="conum" data-value="1"></i><b>(1)</b>
-                <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"Bearer %s"</span><span class="o">,</span> <span class="n">token</span><span class="o">)</span> <i class="conum" data-value="2"></i><b>(2)</b>
+            <span class="nc">Key</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"authorization"</span><span class="o">,</span> <span class="nc">Metadata</span><span class="o">.</span><span class="na">ASCII_STRING_MARSHALLER</span><span class="o">),</span> <i class="conum" data-value="1"></i><b>(1)</b>
+            <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"Bearer %s"</span><span class="o">,</span> <span class="n">token</span><span class="o">)</span> <i class="conum" data-value="2"></i><b>(2)</b>
         <span class="o">);</span></code></pre>
 </div>
 </div>
@@ -1016,7 +1016,7 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java">        <span class="c1">// create output stream</span>
         <span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">OutgoingMessage</span><span class="o">&gt;</span> <span class="n">outgoingStream</span> <span class="o">=</span> <span class="nc">Multi</span><span class="o">.</span><span class="na">createFrom</span><span class="o">()</span>
-                <span class="o">.&lt;</span><span class="nc">OutgoingMessage</span><span class="o">&gt;</span><span class="n">emitter</span><span class="o">(</span><span class="nl">ChatMain:</span><span class="o">:</span><span class="nc">SendMessages</span><span class="o">);</span></code></pre>
+            <span class="o">.&lt;</span><span class="nc">OutgoingMessage</span><span class="o">&gt;</span><span class="n">emitter</span><span class="o">(</span><span class="nl">ChatMain:</span><span class="o">:</span><span class="n">sendMessages</span><span class="o">);</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1028,7 +1028,7 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java">        <span class="c1">// connect to service and start printing incoming messages</span>
-        <span class="nc">PrintMessages</span><span class="o">(</span><span class="n">authorizedStub</span><span class="o">.</span><span class="na">connect</span><span class="o">(</span><span class="n">outgoingStream</span><span class="o">));</span></code></pre>
+        <span class="n">printMessages</span><span class="o">(</span><span class="n">authorizedStub</span><span class="o">.</span><span class="na">connect</span><span class="o">(</span><span class="n">outgoingStream</span><span class="o">));</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1047,16 +1047,17 @@ Es wird immer der zuletzt geschickte Name verwendet.</p>
      *
      * @param incomingStream stream with incoming messages
      */</span>
-    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">PrintMessages</span><span class="o">(</span><span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">IncomingMessage</span><span class="o">&gt;</span> <span class="n">incomingStream</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">printMessages</span><span class="o">(</span><span class="nc">Multi</span><span class="o">&lt;</span><span class="nc">IncomingMessage</span><span class="o">&gt;</span> <span class="n">incomingStream</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">incomingStream</span>
-                <span class="o">.</span><span class="na">subscribe</span><span class="o">()</span>
-                <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="n">incomingMessage</span> <span class="o">-&gt;</span>
-                        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span>
-                                <span class="s">"\033[2K\r%s: %s\n\rWrite message: %s"</span><span class="o">,</span>
-                                <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span>
-                                <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span>
-                                <span class="n">message</span>
-                        <span class="o">));</span>
+            <span class="o">.</span><span class="na">subscribe</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="n">incomingMessage</span> <span class="o">-&gt;</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span>
+                    <span class="s">"\033[2K\r%s: %s\n\rWrite message: %s"</span><span class="o">,</span>
+                    <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span>
+                    <span class="n">incomingMessage</span><span class="o">.</span><span class="na">getResponse</span><span class="o">(),</span>
+                    <span class="n">message</span>
+                <span class="o">)</span>
+            <span class="o">);</span>
     <span class="o">}</span></code></pre>
 </div>
 </div>
@@ -1074,29 +1075,37 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
      *
      * @param emitter the emitter that sends messages back to the service
      */</span>
-    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">SendMessages</span><span class="o">(</span>
-            <span class="nc">MultiEmitter</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="nc">OutgoingMessage</span><span class="o">&gt;</span> <span class="n">emitter</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">sendMessages</span><span class="o">(</span>
+        <span class="nc">MultiEmitter</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="nc">OutgoingMessage</span><span class="o">&gt;</span> <span class="n">emitter</span>
     <span class="o">)</span> <span class="o">{</span>
-        <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
-            <span class="k">try</span> <span class="o">{</span>
-                <span class="c1">// fill the message with user input</span>
-                <span class="n">readMessage</span><span class="o">();</span> <i class="conum" data-value="1"></i><b>(1)</b>
-            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-                <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
-            <span class="o">}</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">Terminal</span> <span class="n">terminal</span> <span class="o">=</span> <span class="nc">TerminalBuilder</span><span class="o">.</span><span class="na">terminal</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// strip flags from terminal</span>
+            <span class="n">terminal</span><span class="o">.</span><span class="na">enterRawMode</span><span class="o">();</span> <i class="conum" data-value="1"></i><b>(1)</b>
 
-            <span class="c1">// send the message to service</span>
-            <span class="n">emitter</span><span class="o">.</span><span class="na">emit</span><span class="o">(</span> <i class="conum" data-value="2"></i><b>(2)</b>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="c1">// fill the message with user input</span>
+                    <span class="n">readMessage</span><span class="o">(</span><span class="n">terminal</span><span class="o">);</span> <i class="conum" data-value="2"></i><b>(2)</b>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+                <span class="o">}</span>
+
+                <span class="c1">// send the message to service</span>
+                <span class="n">emitter</span><span class="o">.</span><span class="na">emit</span><span class="o">(</span>
+                    <i class="conum" data-value="3"></i><b>(3)</b>
                     <span class="nc">OutgoingMessage</span><span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
-                            <span class="o">.</span><span class="na">setMessage</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">toString</span><span class="o">())</span>
-                            <span class="o">.</span><span class="na">build</span><span class="o">()</span>
-            <span class="o">);</span>
+                        <span class="o">.</span><span class="na">setMessage</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">toString</span><span class="o">())</span>
+                        <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+                <span class="o">);</span>
 
-            <span class="c1">// print finished message line</span>
-            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"\033[2K\rYou wrote: %s\n\r"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span> <i class="conum" data-value="3"></i><b>(3)</b>
+                <span class="c1">// print finished message line</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"\033[2K\rYou wrote: %s\n\r"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span> <i class="conum" data-value="4"></i><b>(4)</b>
 
-            <span class="c1">// empty the message</span>
-            <span class="n">message</span><span class="o">.</span><span class="na">setLength</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <i class="conum" data-value="4"></i><b>(4)</b>
+                <span class="c1">// empty the message</span>
+                <span class="n">message</span><span class="o">.</span><span class="na">setLength</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> <i class="conum" data-value="5"></i><b>(5)</b>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
         <span class="o">}</span>
     <span class="o">}</span></code></pre>
 </div>
@@ -1105,18 +1114,32 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Als Erstes wird unsere statische message Variable befüllt.</td>
+<td>Bestimmte Flags werden vom Terminal entfernt, sodass der Input, der in die Konsole geschrieben wird:
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>sofort freigegeben wird und nicht erst nach einem Enter.</p>
+</li>
+<li>
+<p>nicht angezeigt wird, so können non-printable Characters auf der Konsole umgangen werden.</p>
+</li>
+</ol>
+</div></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Mit dieser Variable wird dann durch den Emitter unsere Nachricht an den gRPC Service geschickt.</td>
+<td>Als Erstes wird unsere statische message Variable befüllt.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.</td>
+<td>Mit dieser Variable wird dann durch den Emitter unsere Nachricht an den gRPC Service geschickt.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>Zuletzt wird unsere Variable message wieder zurückgesetzt.</td>
 </tr>
 </table>
@@ -1134,49 +1157,49 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
      *
      * @throws IOException if the connection to the terminal cannot be established
      */</span>
-    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">readMessage</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">readMessage</span><span class="o">(</span><span class="nc">Terminal</span> <span class="n">terminal</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
         <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"Write message: "</span><span class="o">);</span>
 
-        <span class="k">try</span> <span class="o">(</span><span class="nc">Terminal</span> <span class="n">terminal</span> <span class="o">=</span> <span class="nc">TerminalBuilder</span><span class="o">.</span><span class="na">terminal</span><span class="o">())</span> <span class="o">{</span>
-            <span class="c1">// strip flags from terminal</span>
-            <span class="n">terminal</span><span class="o">.</span><span class="na">enterRawMode</span><span class="o">();</span>
-            <span class="kt">int</span> <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
 
-            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
-                <span class="c1">// read one character from the console</span>
-                <span class="kt">char</span> <span class="n">character</span> <span class="o">=</span> <span class="o">(</span><span class="kt">char</span><span class="o">)</span> <span class="n">terminal</span><span class="o">.</span><span class="na">reader</span><span class="o">().</span><span class="na">read</span><span class="o">();</span>
+        <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// read one character from the console</span>
+            <span class="kt">char</span> <span class="n">character</span> <span class="o">=</span> <span class="o">(</span><span class="kt">char</span><span class="o">)</span> <span class="n">terminal</span><span class="o">.</span><span class="na">reader</span><span class="o">().</span><span class="na">read</span><span class="o">();</span>
 
-                <span class="k">if</span> <span class="o">((</span><span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'['</span><span class="o">)</span> <span class="o">||</span> <span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-                    <span class="n">controlCharCounter</span><span class="o">--;</span>
-                    <span class="k">continue</span><span class="o">;</span>
-                <span class="o">}</span>
-
-                <span class="c1">// stop reading and return</span>
-                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="sc">'\n'</span> <span class="o">||</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'\r'</span><span class="o">)</span> <span class="o">{</span>
-                    <span class="k">return</span><span class="o">;</span>
-                <span class="o">}</span>
-
-                <span class="c1">// delete single character</span>
-                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">127</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">message</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
-                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"\b \b"</span><span class="o">);</span>
-                    <span class="n">message</span><span class="o">.</span><span class="na">deleteCharAt</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">);</span>
-                <span class="o">}</span>
-
-                <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
-
-                <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">27</span><span class="o">)</span> <span class="o">{</span>
-                    <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
-                <span class="o">}</span>
-
-                <span class="c1">// do not display/send control characters</span>
-                <span class="k">if</span> <span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">isISOControl</span><span class="o">(</span><span class="n">character</span><span class="o">))</span> <span class="o">{</span>
-                    <span class="k">continue</span><span class="o">;</span>
-                <span class="o">}</span>
-
-                <span class="c1">// print character to console and append it to message</span>
-                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
-                <span class="n">message</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span>
+                <span class="o">(</span><span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'['</span><span class="o">)</span> <span class="o">||</span>
+                <span class="n">controlCharCounter</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="o">)</span> <span class="o">{</span>
+                <span class="n">controlCharCounter</span><span class="o">--;</span>
+                <span class="k">continue</span><span class="o">;</span>
             <span class="o">}</span>
+
+            <span class="c1">// stop reading and return</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="sc">'\n'</span> <span class="o">||</span> <span class="n">character</span> <span class="o">==</span> <span class="sc">'\r'</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="c1">// delete single character</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">127</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">message</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">"\b \b"</span><span class="o">);</span>
+                <span class="n">message</span><span class="o">.</span><span class="na">deleteCharAt</span><span class="o">(</span><span class="n">message</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">);</span>
+            <span class="o">}</span>
+
+            <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">character</span> <span class="o">==</span> <span class="mi">27</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">controlCharCounter</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="c1">// do not display/send control characters</span>
+            <span class="k">if</span> <span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">isISOControl</span><span class="o">(</span><span class="n">character</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">continue</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="c1">// print character to console and append it to message</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
+
+            <span class="n">message</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">character</span><span class="o">);</span>
         <span class="o">}</span>
     <span class="o">}</span></code></pre>
 </div>
@@ -1187,20 +1210,7 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
 <p>In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit Enter beendet.</p>
 </div>
 <div class="paragraph">
-<p>Das bestimmte Flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>sofort freigegeben wird und nicht erst nach einem Enter</p>
-</li>
-<li>
-<p>nicht angezeigt wird, so können non-printable Characters auf der Konsole umgangen werden</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>Dann wird der Input des Users gelesen und in die Variable message gespeichert.</p>
+<p>Der Input des Users gelesen und in die Variable message gespeichert.</p>
 </div>
 <div class="paragraph">
 <p>Bei einem Enter wird die aus dieser Methode returned.</p>
@@ -1251,7 +1261,7 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-28 09:55:55 UTC
+Last updated 2025-03-29 12:25:52 UTC
 </div>
 </div>
 </body>
