@@ -11,10 +11,9 @@ import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import java.io.IOException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-
-import java.io.IOException;
 
 @QuarkusMain
 public class ChatMain implements QuarkusApplication {
@@ -28,16 +27,17 @@ public class ChatMain implements QuarkusApplication {
      *
      * @param incomingStream stream with incoming messages
      */
-    public static void PrintMessages(Multi<IncomingMessage> incomingStream) {
+    public static void printMessages(Multi<IncomingMessage> incomingStream) {
         incomingStream
-                .subscribe()
-                .with(incomingMessage ->
-                        System.out.printf(
-                                "\033[2K\r%s: %s\n\rWrite message: %s",
-                                incomingMessage.getName(),
-                                incomingMessage.getResponse(),
-                                message
-                        ));
+            .subscribe()
+            .with(incomingMessage ->
+                System.out.printf(
+                    "\033[2K\r%s: %s\n\rWrite message: %s",
+                    incomingMessage.getName(),
+                    incomingMessage.getResponse(),
+                    message
+                )
+            );
     }
 
     /**
@@ -45,8 +45,8 @@ public class ChatMain implements QuarkusApplication {
      *
      * @param emitter the emitter that sends messages back to the service
      */
-    public static void SendMessages(
-            MultiEmitter<? super OutgoingMessage> emitter
+    public static void sendMessages(
+        MultiEmitter<? super OutgoingMessage> emitter
     ) {
         while (true) {
             try {
@@ -60,7 +60,6 @@ public class ChatMain implements QuarkusApplication {
 
             // print finished message line
             System.out.printf("\033[2K\rYou wrote: %s\n\r", message);
-
             // TODO: empty the message
         }
     }
@@ -82,7 +81,10 @@ public class ChatMain implements QuarkusApplication {
                 // read one character from the console
                 char character = (char) terminal.reader().read();
 
-                if ((controlCharCounter == 2 && character == '[') || controlCharCounter == 1) {
+                if (
+                    (controlCharCounter == 2 && character == '[') ||
+                    controlCharCounter == 1
+                ) {
                     controlCharCounter--;
                     continue;
                 }
@@ -101,7 +103,6 @@ public class ChatMain implements QuarkusApplication {
                 if (Character.isISOControl(character)) {
                     continue;
                 }
-
                 // TODO: print character to console and append it to message
             }
         }

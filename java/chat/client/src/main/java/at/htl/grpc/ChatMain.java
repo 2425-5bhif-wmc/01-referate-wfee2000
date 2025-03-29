@@ -11,22 +11,23 @@ import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import java.io.IOException;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-
-import java.io.IOException;
 
 @QuarkusMain
 public class ChatMain implements QuarkusApplication {
 
     // tag::message[]
     private static final StringBuilder message = new StringBuilder();
+
     // end::message[]
 
     // tag::injectStub[]
     // Inject gRPC stub
     @GrpcClient
     Chat chat;
+
     // end::injectStub[]
 
     // tag::printMessages[]
@@ -35,17 +36,19 @@ public class ChatMain implements QuarkusApplication {
      *
      * @param incomingStream stream with incoming messages
      */
-    public static void PrintMessages(Multi<IncomingMessage> incomingStream) {
+    public static void printMessages(Multi<IncomingMessage> incomingStream) {
         incomingStream
-                .subscribe()
-                .with(incomingMessage ->
-                        System.out.printf(
-                                "\033[2K\r%s: %s\n\rWrite message: %s",
-                                incomingMessage.getName(),
-                                incomingMessage.getResponse(),
-                                message
-                        ));
+            .subscribe()
+            .with(incomingMessage ->
+                System.out.printf(
+                    "\033[2K\r%s: %s\n\rWrite message: %s",
+                    incomingMessage.getName(),
+                    incomingMessage.getResponse(),
+                    message
+                )
+            );
     }
+
     // end::printMessages[]
 
     // tag::sendMessages[]
@@ -54,8 +57,8 @@ public class ChatMain implements QuarkusApplication {
      *
      * @param emitter the emitter that sends messages back to the service
      */
-    public static void SendMessages(
-            MultiEmitter<? super OutgoingMessage> emitter
+    public static void sendMessages(
+        MultiEmitter<? super OutgoingMessage> emitter
     ) {
         while (true) {
             try {
@@ -66,10 +69,11 @@ public class ChatMain implements QuarkusApplication {
             }
 
             // send the message to service
-            emitter.emit( // <2>
-                    OutgoingMessage.newBuilder()
-                            .setMessage(message.toString())
-                            .build()
+            emitter.emit(
+                // <2>
+                OutgoingMessage.newBuilder()
+                    .setMessage(message.toString())
+                    .build()
             );
 
             // print finished message line
@@ -79,6 +83,7 @@ public class ChatMain implements QuarkusApplication {
             message.setLength(0); // <4>
         }
     }
+
     // end::sendMessages[]
 
     // tag::readMessage[]
@@ -99,7 +104,10 @@ public class ChatMain implements QuarkusApplication {
                 // read one character from the console
                 char character = (char) terminal.reader().read();
 
-                if ((controlCharCounter == 2 && character == '[') || controlCharCounter == 1) {
+                if (
+                    (controlCharCounter == 2 && character == '[') ||
+                    controlCharCounter == 1
+                ) {
                     controlCharCounter--;
                     continue;
                 }
@@ -132,6 +140,7 @@ public class ChatMain implements QuarkusApplication {
             }
         }
     }
+
     // end::readMessage[]
 
     // tag::getToken[]
@@ -139,22 +148,22 @@ public class ChatMain implements QuarkusApplication {
     public int run(String... args) {
         // claim name from server
         String token = chat
-                .claimName(
-                        ClaimNameRequest.newBuilder()
-                                .setName(String.join(" ", args))
-                                .build()
-                )
-                .await()
-                .indefinitely()
-                .getToken();
+            .claimName(
+                ClaimNameRequest.newBuilder()
+                    .setName(String.join(" ", args))
+                    .build()
+            )
+            .await()
+            .indefinitely()
+            .getToken();
         // end::getToken[]
 
         // tag::makeHeaders[]
         // append token in header
         Metadata headers = new Metadata();
         headers.put(
-                Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), // <1>
-                String.format("Bearer %s", token) // <2>
+            Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), // <1>
+            String.format("Bearer %s", token) // <2>
         );
         // end::makeHeaders[]
 
@@ -166,12 +175,12 @@ public class ChatMain implements QuarkusApplication {
         // tag::createMulti[]
         // create output stream
         Multi<OutgoingMessage> outgoingStream = Multi.createFrom()
-                .<OutgoingMessage>emitter(ChatMain::SendMessages);
+            .<OutgoingMessage>emitter(ChatMain::sendMessages);
         // end::createMulti[]
 
         // tag::connect[]
         // connect to service and start printing incoming messages
-        PrintMessages(authorizedStub.connect(outgoingStream));
+        printMessages(authorizedStub.connect(outgoingStream));
         // end::connect[]
 
         return 0;
