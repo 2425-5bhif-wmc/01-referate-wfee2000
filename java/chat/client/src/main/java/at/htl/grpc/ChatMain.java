@@ -12,6 +12,7 @@ import io.quarkus.runtime.annotations.QuarkusMain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import java.io.IOException;
+import java.util.Scanner;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -60,27 +61,34 @@ public class ChatMain implements QuarkusApplication {
     public static void sendMessages(
         MultiEmitter<? super OutgoingMessage> emitter
     ) {
-        while (true) {
-            try {
-                // fill the message with user input
-                readMessage(); // <1>
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try (Terminal terminal = TerminalBuilder.terminal()) {
+            // strip flags from terminal
+            terminal.enterRawMode(); // <1>
+
+            while (true) {
+                try {
+                    // fill the message with user input
+                    readMessage(terminal); // <2>
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // send the message to service
+                emitter.emit(
+                    // <3>
+                    OutgoingMessage.newBuilder()
+                        .setMessage(message.toString())
+                        .build()
+                );
+
+                // print finished message line
+                System.out.printf("\033[2K\rYou wrote: %s\n\r", message); // <4>
+
+                // empty the message
+                message.setLength(0); // <5>
             }
-
-            // send the message to service
-            emitter.emit(
-                // <2>
-                OutgoingMessage.newBuilder()
-                    .setMessage(message.toString())
-                    .build()
-            );
-
-            // print finished message line
-            System.out.printf("\033[2K\rYou wrote: %s\n\r", message); // <3>
-
-            // empty the message
-            message.setLength(0); // <4>
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -92,52 +100,49 @@ public class ChatMain implements QuarkusApplication {
      *
      * @throws IOException if the connection to the terminal cannot be established
      */
-    private static void readMessage() throws IOException {
+    private static void readMessage(Terminal terminal) throws IOException {
         System.out.print("Write message: ");
 
-        try (Terminal terminal = TerminalBuilder.terminal()) {
-            // strip flags from terminal
-            terminal.enterRawMode();
-            int controlCharCounter = 0;
+        int controlCharCounter = 0;
 
-            while (true) {
-                // read one character from the console
-                char character = (char) terminal.reader().read();
+        while (true) {
+            // read one character from the console
+            char character = (char) terminal.reader().read();
 
-                if (
-                    (controlCharCounter == 2 && character == '[') ||
-                    controlCharCounter == 1
-                ) {
-                    controlCharCounter--;
-                    continue;
-                }
-
-                // stop reading and return
-                if (character == '\n' || character == '\r') {
-                    return;
-                }
-
-                // delete single character
-                if (character == 127 && !message.isEmpty()) {
-                    System.out.print("\b \b");
-                    message.deleteCharAt(message.length() - 1);
-                }
-
-                controlCharCounter = 0;
-
-                if (character == 27) {
-                    controlCharCounter = 2;
-                }
-
-                // do not display/send control characters
-                if (Character.isISOControl(character)) {
-                    continue;
-                }
-
-                // print character to console and append it to message
-                System.out.print(character);
-                message.append(character);
+            if (
+                (controlCharCounter == 2 && character == '[') ||
+                controlCharCounter == 1
+            ) {
+                controlCharCounter--;
+                continue;
             }
+
+            // stop reading and return
+            if (character == '\n' || character == '\r') {
+                return;
+            }
+
+            // delete single character
+            if (character == 127 && !message.isEmpty()) {
+                System.out.print("\b \b");
+                message.deleteCharAt(message.length() - 1);
+            }
+
+            controlCharCounter = 0;
+
+            if (character == 27) {
+                controlCharCounter = 2;
+            }
+
+            // do not display/send control characters
+            if (Character.isISOControl(character)) {
+                continue;
+            }
+
+            // print character to console and append it to message
+            System.out.print(character);
+
+            message.append(character);
         }
     }
 

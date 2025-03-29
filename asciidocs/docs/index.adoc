@@ -297,10 +297,15 @@ Dann wird die empfangene Nachricht ausgegeben und schlussendlich wird in der nä
 include::{javastubroot}/{javastubcode}/ChatMain.java[tag=sendMessages]
 ----
 
-<1> Als Erstes wird unsere statische message Variable befüllt.
-<2> Mit dieser Variable wird dann durch den Emitter unsere Nachricht an den gRPC Service geschickt.
-<3> Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.
-<4> Zuletzt wird unsere Variable message wieder zurückgesetzt.
+<1> Bestimmte Flags werden vom Terminal entfernt, sodass der Input, der in die Konsole geschrieben wird:
+
+1. sofort freigegeben wird und nicht erst nach einem Enter.
+2. nicht angezeigt wird, so können non-printable Characters auf der Konsole umgangen werden.
+
+<2> Als Erstes wird unsere statische message Variable befüllt.
+<3> Mit dieser Variable wird dann durch den Emitter unsere Nachricht an den gRPC Service geschickt.
+<4> Die input Zeile wird nun gelöscht und anstatt von `Write Message: ` wird die Zeile mit `You wrote: ` befüllt.
+<5> Zuletzt wird unsere Variable message wieder zurückgesetzt.
 
 ==== Nachrichten Einlesen
 
@@ -315,12 +320,8 @@ include::{javastubroot}/{javastubcode}/ChatMain.java[tag=readMessage]
 
 In dieser Methode wird jeweils eine Nachricht eingelesen. Die eingabe wird mit Enter beendet.
 
-Das bestimmte Flags werden vom Terminal entfernt, sodass der Input der in die Konsole geschrieben wird:
 
-1. sofort freigegeben wird und nicht erst nach einem Enter
-2. nicht angezeigt wird, so können non-printable Characters auf der Konsole umgangen werden
-
-Dann wird der Input des Users gelesen und in die Variable message gespeichert.
+Der Input des Users gelesen und in die Variable message gespeichert.
 
 Bei einem Enter wird die aus dieser Methode returned.
 

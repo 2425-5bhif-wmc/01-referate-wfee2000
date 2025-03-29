@@ -48,19 +48,26 @@ public class ChatMain implements QuarkusApplication {
     public static void sendMessages(
         MultiEmitter<? super OutgoingMessage> emitter
     ) {
-        while (true) {
-            try {
-                // fill the message with user input
-                readMessage();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try (Terminal terminal = TerminalBuilder.terminal()) {
+            // strip flags from terminal
+            terminal.enterRawMode();
+
+            while (true) {
+                try {
+                    // fill the message with user input
+                    readMessage(terminal);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // TODO: send the message to service
+
+                // print finished message line
+                System.out.printf("\033[2K\rYou wrote: %s\n\r", message);
+                // TODO: empty the message
             }
-
-            // TODO: send the message to service
-
-            // print finished message line
-            System.out.printf("\033[2K\rYou wrote: %s\n\r", message);
-            // TODO: empty the message
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,42 +76,38 @@ public class ChatMain implements QuarkusApplication {
      *
      * @throws IOException if the connection to the terminal cannot be established
      */
-    private static void readMessage() throws IOException {
+    private static void readMessage(Terminal terminal) throws IOException {
         System.out.print("Write message: ");
 
-        try (Terminal terminal = TerminalBuilder.terminal()) {
-            // strip flags from terminal
-            terminal.enterRawMode();
-            int controlCharCounter = 0;
+        int controlCharCounter = 0;
 
-            while (true) {
-                // read one character from the console
-                char character = (char) terminal.reader().read();
+        while (true) {
+            // read one character from the console
+            char character = (char) terminal.reader().read();
 
-                if (
-                    (controlCharCounter == 2 && character == '[') ||
-                    controlCharCounter == 1
-                ) {
-                    controlCharCounter--;
-                    continue;
-                }
-
-                // TODO: stop reading and return
-
-                // TODO: delete single character
-
-                controlCharCounter = 0;
-
-                if (character == 27) {
-                    controlCharCounter = 2;
-                }
-
-                // do not display/send control characters
-                if (Character.isISOControl(character)) {
-                    continue;
-                }
-                // TODO: print character to console and append it to message
+            if (
+                (controlCharCounter == 2 && character == '[') ||
+                controlCharCounter == 1
+            ) {
+                controlCharCounter--;
+                continue;
             }
+
+            // TODO: stop reading and return
+
+            // TODO: delete single character
+
+            controlCharCounter = 0;
+
+            if (character == 27) {
+                controlCharCounter = 2;
+            }
+
+            // do not display/send control characters
+            if (Character.isISOControl(character)) {
+                continue;
+            }
+            // TODO: print character to console and append it to message
         }
     }
 
